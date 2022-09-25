@@ -1,3 +1,4 @@
+import Fiber from 'fibers';
 import assert from 'assert';
 import { readFileSync, chmodSync, chownSync } from 'fs';
 import { createServer } from 'http';
@@ -1041,8 +1042,6 @@ function runWebAppServer() {
     }));
   }
 
-  WebAppInternals.reloadClientPrograms();
-
   // webserver
   var app = connect();
 
@@ -1363,11 +1362,13 @@ function runWebAppServer() {
       httpServer.listen(listenOptions, cb);
     },
   });
-
+  WebAppInternals.reloadClientPrograms();
+  
   // Let the rest of the packages (and Meteor.startup hooks) insert connect
   // middlewares and update __meteor_runtime_config__, then keep going to set up
   // actually serving HTML.
-  exports.main = argv => {
+  // TODO: fix this
+  /*exports.main = argv => {
     WebAppInternals.generateBoilerplate();
 
     const startHttpServer = listenOptions => {
@@ -1444,7 +1445,7 @@ function runWebAppServer() {
     }
 
     return 'DAEMON';
-  };
+  };*/
 }
 
 var inlineScriptsAllowed = true;
@@ -1491,4 +1492,6 @@ WebAppInternals.getBoilerplate = getBoilerplate;
 WebAppInternals.additionalStaticJs = additionalStaticJs;
 
 // Start the server!
-runWebAppServer();
+new Fiber(() => {
+  runWebAppServer();
+}).run();

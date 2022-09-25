@@ -69,7 +69,7 @@ StreamServer = function () {
   }
 
   self.server = sockjs.createServer(serverOptions);
-
+  debugger;
   // Install the sockjs handlers, but we want to keep around our own particular
   // request handler that adjusts idle timeouts while we have an outstanding
   // request.  This compensates for the fact that sockjs removes all listeners

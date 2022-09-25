@@ -2,6 +2,7 @@
 // XXX presently there is no way to destroy/clean up a Collection
 
 import { normalizeProjection } from "./mongo_utils";
+import { Log } from 'meteor/logging';
 
 /**
  * @summary Namespace for MongoDB-related items
@@ -735,7 +736,6 @@ Object.assign(Mongo.Collection.prototype, {
     if (self._collection.createIndex) {
       self._collection.createIndex(index, options);
     } else {
-      import { Log } from 'meteor/logging';
       Log.debug(`_ensureIndex has been deprecated, please use the new 'createIndex' instead${options?.name ? `, index name: ${options.name}` : `, index: ${JSON.stringify(index)}`}`)
       self._collection._ensureIndex(index, options);
     }

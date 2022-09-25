@@ -1,14 +1,11 @@
-require("./extensions.js");
-
-require("meteor-promise").makeCompatible(
-  Promise,
-  // Allow every Promise callback to run in a Fiber drawn from a pool of
-  // reusable Fibers.
-  require("fibers")
-);
+import Fiber from "fibers";
+import "./extensions.js";
+import * as promise from "meteor-promise";
+import { setMinimumBrowserVersions } from "meteor/modern-browsers";
+promise.makeCompatible(Promise, Fiber);
 
 // Reference: https://caniuse.com/#feat=promises
-require("meteor/modern-browsers").setMinimumBrowserVersions({
+setMinimumBrowserVersions({
   chrome: 32,
   edge: 12,
   // Since there is no IE12, this effectively excludes Internet Explorer
