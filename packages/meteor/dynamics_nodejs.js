@@ -112,9 +112,7 @@ EVp.withValue = function (value, func) {
  * @return {Function} The wrapped function
  */
 Meteor.bindEnvironment = function (func, onException, _this) {
-  Meteor._nodeCodeMustBeInFiber();
-
-  var dynamics = Fiber.current._meteor_dynamics;
+  var dynamics = Fiber.current?._meteor_dynamics;
   var boundValues = dynamics ? dynamics.slice() : [];
 
   if (!onException || typeof(onException) === 'string') {
