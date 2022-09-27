@@ -3,7 +3,7 @@ import assert from 'assert';
 import { readFileSync, chmodSync, chownSync } from 'fs';
 import { createServer } from 'http';
 import { userInfo } from 'os';
-import { join as pathJoin, dirname as pathDirname } from 'path';
+import { join as pathJoin, dirname as pathDirname, resolve } from 'path';
 import { parse as parseUrl } from 'url';
 import { createHash } from 'crypto';
 import { connect } from './connect.js';
@@ -28,6 +28,11 @@ var LONG_SOCKET_TIMEOUT = 120 * 1000;
 export const WebApp = {};
 export const WebAppInternals = {};
 
+let mainResolve;
+let main;
+const mainPromise = new Promise((resolve) => {
+  mainResolve = resolve;
+});
 const hasOwn = Object.prototype.hasOwnProperty;
 
 // backwards compat to 2.0 of connect
@@ -1368,7 +1373,7 @@ function runWebAppServer() {
   // middlewares and update __meteor_runtime_config__, then keep going to set up
   // actually serving HTML.
   // TODO: fix this
-  /*exports.main = argv => {
+  main = argv => {
     WebAppInternals.generateBoilerplate();
 
     const startHttpServer = listenOptions => {
@@ -1445,7 +1450,8 @@ function runWebAppServer() {
     }
 
     return 'DAEMON';
-  };*/
+  };
+  mainResolve();
 }
 
 var inlineScriptsAllowed = true;
@@ -1495,3 +1501,8 @@ WebAppInternals.additionalStaticJs = additionalStaticJs;
 new Fiber(() => {
   runWebAppServer();
 }).run();
+
+export async function getMain() {
+  await mainPromise;
+  return main;
+}
