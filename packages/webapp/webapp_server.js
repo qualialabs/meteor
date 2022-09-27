@@ -627,7 +627,7 @@ WebAppInternals.staticFilesMiddleware = async function(
   // If pauseClient(arch) has been called, program.paused will be a
   // Promise that will be resolved when the program is unpaused.
   const program = WebApp.clientPrograms[arch];
-  await program.paused;
+  Promise.await(program.paused);
 
   if (
     path === '/meteor_runtime_config.js' &&
@@ -1279,7 +1279,7 @@ function runWebAppServer() {
 
       // If pauseClient(arch) has been called, program.paused will be a
       // Promise that will be resolved when the program is unpaused.
-      await WebApp.clientPrograms[arch].paused;
+      Promise.await(WebApp.clientPrograms[arch].paused);
 
       return getBoilerplateAsync(request, arch)
         .then(({ stream, statusCode, headers: newHeaders }) => {
