@@ -3,6 +3,7 @@
 
 import { normalizeProjection } from "./mongo_utils";
 import { Log } from 'meteor/logging';
+import { LocalCollectionDriver } from './local_collection_driver.js';
 
 /**
  * @summary Namespace for MongoDB-related items
@@ -106,7 +107,6 @@ Mongo.Collection = function Collection(name, options) {
     ) {
       options._driver = MongoInternals.defaultRemoteCollectionDriver();
     } else {
-      const { LocalCollectionDriver } = require('./local_collection_driver.js');
       options._driver = LocalCollectionDriver;
     }
   }
