@@ -179,74 +179,74 @@ MongoConnection = function (url, options) {
   self._oplogHandle = null;
   self._docFetcher = null;
 
-
-  var connectFuture = new Future;
-  new MongoDB.MongoClient(
-    url,
-    mongoOptions
-  ).connect(
-    Meteor.bindEnvironment(
-      function (err, client) {
-        if (err) {
-          throw err;
-        }
-
-        var db = client.db();
-        try {
-          const helloDocument = db.admin().command({hello: 1}).await();
-          // First, figure out what the current primary is, if any.
-          if (helloDocument.primary) {
-            self._primary = helloDocument.primary;
-          }
-        }catch(_){
-          // ismaster command is supported on older mongodb versions
-          const isMasterDocument = db.admin().command({ismaster:1}).await();
-          // First, figure out what the current primary is, if any.
-          if (isMasterDocument.primary) {
-            self._primary = isMasterDocument.primary;
-          }
-        }
-
-        client.topology.on(
-          'joined', Meteor.bindEnvironment(function (kind, doc) {
-            if (kind === 'primary') {
-              if (doc.primary !== self._primary) {
-                self._primary = doc.primary;
-                self._onFailoverHook.each(function (callback) {
-                  callback();
-                  return true;
-                });
-              }
-            } else if (doc.me === self._primary) {
-              // The thing we thought was primary is now something other than
-              // primary.  Forget that we thought it was primary.  (This means
-              // that if a server stops being primary and then starts being
-              // primary again without another server becoming primary in the
-              // middle, we'll correctly count it as a failover.)
-              self._primary = null;
+  self._connectPromise = new Promise((resolve, reject) => {
+    try {
+      new MongoDB.MongoClient(
+        url,
+        mongoOptions
+      ).connect(
+        Meteor.bindEnvironment(
+          function (err, client) {
+            if (err) {
+              throw err;
             }
-          }));
 
-        // Allow the constructor to return.
-        connectFuture['return']({ client, db });
-      },
-      connectFuture.resolver()  // onException
-    )
-  );
+            var db = client.db();
+            try {
+              const helloDocument = db.admin().command({hello: 1}).await();
+              // First, figure out what the current primary is, if any.
+              if (helloDocument.primary) {
+                self._primary = helloDocument.primary;
+              }
+            }catch(_){
+              // ismaster command is supported on older mongodb versions
+              const isMasterDocument = db.admin().command({ismaster:1}).await();
+              // First, figure out what the current primary is, if any.
+              if (isMasterDocument.primary) {
+                self._primary = isMasterDocument.primary;
+              }
+            }
 
-  // Wait for the connection to be successful (throws on failure) and assign the
-  // results (`client` and `db`) to `self`.
-  Object.assign(self, connectFuture.wait());
-
-  if (options.oplogUrl && ! Package['disable-oplog']) {
-    self._oplogHandle = new OplogHandle(options.oplogUrl, self.db.databaseName);
-    self._docFetcher = new DocFetcher(self);
-  }
+            client.topology.on(
+              'joined', Meteor.bindEnvironment(function (kind, doc) {
+                if (kind === 'primary') {
+                  if (doc.primary !== self._primary) {
+                    self._primary = doc.primary;
+                    self._onFailoverHook.each(function (callback) {
+                      callback();
+                      return true;
+                    });
+                  }
+                } else if (doc.me === self._primary) {
+                  // The thing we thought was primary is now something other than
+                  // primary.  Forget that we thought it was primary.  (This means
+                  // that if a server stops being primary and then starts being
+                  // primary again without another server becoming primary in the
+                  // middle, we'll correctly count it as a failover.)
+                  self._primary = null;
+                }
+              }));
+              self.client = client;
+              self.db = db;
+        
+              if (options.oplogUrl && ! Package['disable-oplog']) {
+                self._oplogHandle = new OplogHandle(options.oplogUrl, self.db.databaseName);
+                self._docFetcher = new DocFetcher(self);
+              }
+              resolve();
+          },
+          reject
+        )
+      );
+    }
+    catch (e) {
+      reject(e);
+    }
+  });
 };
-
 MongoConnection.prototype.close = function() {
   var self = this;
-
+  Promise.await(self._connectPromise);
   if (! self.db)
     throw Error("close called before Connection created?");
 
@@ -265,7 +265,8 @@ MongoConnection.prototype.close = function() {
 // Returns the Mongo Collection object; may yield.
 MongoConnection.prototype.rawCollection = function (collectionName) {
   var self = this;
-
+  Promise.await(self._connectPromise);
+  
   if (! self.db)
     throw Error("rawCollection called before Connection created?");
 
@@ -275,6 +276,7 @@ MongoConnection.prototype.rawCollection = function (collectionName) {
 MongoConnection.prototype._createCappedCollection = function (
     collectionName, byteSize, maxDocuments) {
   var self = this;
+  Promise.await(self._connectPromise);
 
   if (! self.db)
     throw Error("_createCappedCollection called before Connection created?");
@@ -479,6 +481,7 @@ MongoConnection.prototype._dropCollection = function (collectionName, cb) {
 // because it lets the test's fence wait for it to be complete.
 MongoConnection.prototype._dropDatabase = function (cb) {
   var self = this;
+  Promise.await(self._connectPromise);
 
   var write = self._maybeBeginWrite();
   var refresh = function () {

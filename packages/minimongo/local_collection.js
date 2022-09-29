@@ -1,5 +1,7 @@
 import Cursor from './cursor.js';
 import ObserveHandle from './observe_handle.js';
+import Matcher from './matcher.js';
+import Sorter from './sorter.js';
 import {
   hasOwn,
   isIndexable,
@@ -8,6 +10,8 @@ import {
   populateDocumentWithQueryFields,
   projectionDetails,
 } from './common.js';
+
+import { _selectorIsId } from './helpers.js';
 
 // XXX type checking on selectors (graceful error if malformed)
 
@@ -198,7 +202,7 @@ export default class LocalCollection {
       return result;
     }
 
-    const matcher = new Minimongo.Matcher(selector);
+    const matcher = new Matcher(selector);
     const remove = [];
 
     this._eachPossiblyMatchingDoc(selector, (doc, id) => {
@@ -345,7 +349,7 @@ export default class LocalCollection {
       options = {};
     }
 
-    const matcher = new Minimongo.Matcher(selector, true);
+    const matcher = new Matcher(selector, true);
 
     // Save the original results of any query that we might need to
     // _recomputeResults on, because _modifyAndNotify will mutate the objects in
@@ -1103,7 +1107,7 @@ LocalCollection._isModificationMod = mod => {
 // RegExp
 // XXX note that _type(undefined) === 3!!!!
 LocalCollection._isPlainObject = x => {
-  return x && LocalCollection._f._type(x) === 3;
+  return x && Matcher._f._type(x) === 3;
 };
 
 // XXX need a strategy for passing the binding of $ into this
@@ -1388,11 +1392,7 @@ LocalCollection._removeFromResults = (query, doc) => {
 };
 
 // Is this selector just shorthand for lookup by _id?
-LocalCollection._selectorIsId = selector =>
-  typeof selector === 'number' ||
-  typeof selector === 'string' ||
-  selector instanceof MongoID.ObjectID
-;
+LocalCollection._selectorIsId = _selectorIsId;
 
 // Is the selector just lookup by _id (shorthand or not)?
 LocalCollection._selectorIsIdPerhapsAsObject = selector =>
@@ -1684,10 +1684,10 @@ const MODIFIERS = {
       // actually an extension of the Node driver, so it won't work
       // server-side. Could be confusing!
       // XXX is it correct that we don't do geo-stuff here?
-      sortFunction = new Minimongo.Sorter(arg.$sort).getComparator();
+      sortFunction = new Sorter(arg.$sort).getComparator();
 
       toPush.forEach(element => {
-        if (LocalCollection._f._type(element) !== 3) {
+        if (Matcher._f._type(element) !== 3) {
           throw MinimongoError(
             '$push like modifiers using $sort require all elements to be ' +
             'objects',
@@ -1773,7 +1773,7 @@ const MODIFIERS = {
       );
     } else {
       values.forEach(value => {
-        if (toAdd.some(element => LocalCollection._f._equal(value, element))) {
+        if (toAdd.some(element => Matcher._f._equal(value, element))) {
           return;
         }
 
@@ -1830,11 +1830,11 @@ const MODIFIERS = {
       // to permit stuff like {$pull: {a: {$gt: 4}}}.. something
       // like {$gt: 4} is not normally a complete selector.
       // same issue as $elemMatch possibly?
-      const matcher = new Minimongo.Matcher(arg);
+      const matcher = new Matcher(arg);
 
       out = toPull.filter(element => !matcher.documentMatches(element).result);
     } else {
-      out = toPull.filter(element => !LocalCollection._f._equal(element, arg));
+      out = toPull.filter(element => !Matcher._f._equal(element, arg));
     }
 
     target[field] = out;
@@ -1865,7 +1865,7 @@ const MODIFIERS = {
     }
 
     target[field] = toPull.filter(object =>
-      !arg.some(element => LocalCollection._f._equal(object, element))
+      !arg.some(element => Matcher._f._equal(object, element))
     );
   },
   $bit(target, field, arg) {

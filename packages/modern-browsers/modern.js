@@ -1,3 +1,4 @@
+import { createHash } from 'crypto';
 const minimumVersions = Object.create(null);
 const hasOwn = Object.prototype.hasOwnProperty;
 
@@ -121,7 +122,6 @@ function getCaller(calleeName) {
 }
 
 function calculateHashOfMinimumVersions() {
-  const { createHash } = require('crypto');
   return createHash('sha1')
     .update(JSON.stringify(minimumVersions))
     .digest('hex');

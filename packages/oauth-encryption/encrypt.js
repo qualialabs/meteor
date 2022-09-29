@@ -1,6 +1,7 @@
 import crypto from 'crypto';
+
 let gcmKey = null;
-const OAuthEncryption = exports.OAuthEncryption = {};
+export const OAuthEncryption = {};
 const objToStr = Object.prototype.toString;
 
 const isString = value => objToStr.call(value) === "[object String]";
