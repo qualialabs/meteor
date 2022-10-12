@@ -8,6 +8,8 @@ import {
   regexpElementMatcher,
 } from './common.js';
 
+import Matcher from './matcher.js';
+
 // Give a sort spec, which can be in any of these forms:
 //   {"key1": 1, "key2": -1}
 //   [["key1", "asc"], ["key2", "desc"]]
@@ -293,7 +295,7 @@ export default class Sorter {
     const invert = !this._sortSpecParts[i].ascending;
 
     return (key1, key2) => {
-      const compare = LocalCollection._f._cmp(key1[i], key2[i]);
+      const compare = Matcher._f._cmp(key1[i], key2[i]);
       return invert ? -compare : compare;
     };
   }

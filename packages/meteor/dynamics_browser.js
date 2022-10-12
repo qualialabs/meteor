@@ -3,6 +3,7 @@
 var nextSlot = 0;
 var currentValues = [];
 
+Meteor.inFiberOrClient = () => true;
 Meteor.EnvironmentVariable = function () {
   this.slot = nextSlot++;
 };

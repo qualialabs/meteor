@@ -2,6 +2,7 @@ import Fiber from "fibers";
 import "./extensions.js";
 import * as promise from "meteor-promise";
 import { setMinimumBrowserVersions } from "meteor/modern-browsers";
+const _Promise = Promise;
 promise.makeCompatible(Promise, Fiber);
 
 // Reference: https://caniuse.com/#feat=promises
@@ -18,3 +19,5 @@ setMinimumBrowserVersions({
   // https://github.com/Kilian/electron-to-chromium/blob/master/full-versions.js
   electron: [0, 20],
 }, module.id);
+
+export { _Promise as Promise }

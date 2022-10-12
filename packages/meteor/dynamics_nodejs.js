@@ -6,6 +6,9 @@ var Fiber = Npm.require('fibers');
 
 var nextSlot = 0;
 
+Meteor.inFiberOrClient = () => {
+  return !!Fiber.current;
+}
 Meteor._nodeCodeMustBeInFiber = function () {
   if (!Fiber.current) {
     throw new Error("Meteor code must always run within a Fiber. " +

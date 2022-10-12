@@ -730,6 +730,10 @@ Object.assign(Mongo.Collection.prototype, {
   // We'll actually design an index API later. For now, we just pass through to
   // Mongo's, but make it synchronous.
   _ensureIndex(index, options) {
+    if (!Meteor.inFiberOrClient()) {
+      Meteor.bindEnvironment(() => this._ensureIndex(index, options));
+      return;
+    }
     var self = this;
     if (!self._collection._ensureIndex || !self._collection.createIndex)
       throw new Error('Can only call createIndex on server collections');
@@ -754,6 +758,10 @@ Object.assign(Mongo.Collection.prototype, {
    * @param {Boolean} options.sparse Define that the index is sparse, more at [MongoDB documentation](https://docs.mongodb.com/manual/core/index-sparse/)
    */
   createIndex(index, options) {
+    if (!Meteor.inFiberOrClient()) {
+      Meteor.bindEnvironment(() => this.createIndex(index, options));
+      return;
+    }
     var self = this;
     if (!self._collection.createIndex)
       throw new Error('Can only call createIndex on server collections');

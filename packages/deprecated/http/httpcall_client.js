@@ -1,6 +1,7 @@
 var URL = require("meteor/url").URL;
 var common = require("./httpcall_common.js");
-var HTTP = exports.HTTP = common.HTTP;
+exports.HTTP = common.HTTP;
+var HTTP = common.HTTP;
 var hasOwn = Object.prototype.hasOwnProperty;
 
 /**
