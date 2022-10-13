@@ -2,6 +2,12 @@
 import { AsyncLocalStorage } from "async_hooks";
 
 const __async_meteor_dynamics = new AsyncLocalStorage();
+
+// TODO: hackiest of hacks - this is necessary for the fiber-pool meteor implements,
+// it isn't enough to just set the current "async resource" since the original method may have gone out of scope.
+// we need to track the actual store values too.
+Promise.getCurrentAsyncStore = () => __async_meteor_dynamics.getStore();
+Promise.setCurrentAsyncStore = (store) => __async_meteor_dynamics.enterWith(store);
 var Fiber = Npm.require('fibers');
 
 var nextSlot = 0;
@@ -97,7 +103,7 @@ EVp.withValue = function (value, func) {
  * @locus Anywhere
  * @memberOf Meteor
  * @param {Function} func Function that is wrapped
- * @param {Function} onException 
+ * @param {Function} onException
  * @param {Object} _this Optional `this` object against which the original function will be invoked
  * @return {Function} The wrapped function
  */
@@ -121,7 +127,12 @@ Meteor.bindEnvironment = function (func, onException, _this) {
     var args = Array.prototype.slice.call(arguments);
 
     var runWithEnvironment = function () {
-      return __async_meteor_dynamics.run(boundValues.slice(), () => func.call(_this, ...args));
+      try {
+        return __async_meteor_dynamics.run(boundValues.slice(), () => func.call(_this, ...args));
+      }
+      catch (e) {
+        __async_meteor_dynamics.run(boundValues.slice(), () => onException(e));
+      }
     };
 
     if (Fiber.current)

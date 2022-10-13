@@ -1,4 +1,5 @@
 import {hasOwn} from './common';
+import Matcher from './matcher';
 
 // Hack to make LocalCollection generate ObjectIDs by default.
 LocalCollection._useOID = true;
@@ -314,7 +315,7 @@ Tinytest.add('minimongo - misc', test => {
     f: null, g: new Date()};
   let b = EJSON.clone(a);
   test.equal(a, b);
-  test.isTrue(LocalCollection._f._equal(a, b));
+  test.isTrue(Matcher._f._equal(a, b));
   a.a.push(4);
   test.length(b.a, 3);
   a.c = false;
@@ -1964,7 +1965,7 @@ Tinytest.add('minimongo - ordering', test => {
   const date2 = new Date(date1.getTime() + 1000);
 
   // value ordering
-  assert_ordering(test, LocalCollection._f._cmp, [
+  assert_ordering(test, Matcher._f._cmp, [
     null,
     1, 2.2, 3,
     '03', '1', '11', '2', 'a', 'aaa',

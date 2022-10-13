@@ -38,6 +38,12 @@ function FiberPool(targetFiberCount) {
             fiber[key] = entry.dynamics[key];
           });
         }
+        if (entry._arStore) {
+          Promise.setCurrentAsyncStore(entry._arStore);
+        }
+        else {
+          Promise.setCurrentAsyncStore(undefined);
+        }
 
         try {
           entry.resolve(entry.callback.apply(
@@ -95,7 +101,9 @@ function FiberPool(targetFiberCount) {
       entry.resolve = resolve;
       entry.reject = reject;
     });
-
+    if (entry._ar) {
+      fiber._ar = entry._ar;
+    }
     fiber.run(entry);
 
     return promise;

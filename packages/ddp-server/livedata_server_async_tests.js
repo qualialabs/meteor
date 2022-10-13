@@ -128,10 +128,10 @@ Tinytest.addAsync('livedata server - async publish object', function(
     let testsLength = 0;
 
     onSubscriptions = function(subscription) {
-      onSubscriptions = undefined;
-      clientConn.disconnect();
       testsLength++;
       if (testsLength == 3) {
+        onSubscriptions = undefined;
+        clientConn.disconnect();
         onComplete();
       }
     };

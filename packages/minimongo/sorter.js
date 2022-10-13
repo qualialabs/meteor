@@ -78,7 +78,7 @@ export default class Sorter {
         selector[spec.path] = 1;
       });
 
-      this._selectorForAffectedByModifier = new Minimongo.Matcher(selector);
+      this._selectorForAffectedByModifier = new Matcher(selector);
     }
 
     this._keyComparator = composeComparators(

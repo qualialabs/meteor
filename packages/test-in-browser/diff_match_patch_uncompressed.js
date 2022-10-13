@@ -2187,7 +2187,7 @@ diff_match_patch.patch_obj.prototype.toString = function() {
 // In a browser, 'this' will be 'window'.
 // Users of node.js should 'require' the uncompressed version since Google's
 // JS compiler may break the following exports for non-browser environments.
-this['diff_match_patch'] = diff_match_patch;
-this['DIFF_DELETE'] = DIFF_DELETE;
-this['DIFF_INSERT'] = DIFF_INSERT;
-this['DIFF_EQUAL'] = DIFF_EQUAL;
+globalThis['diff_match_patch'] = diff_match_patch;
+globalThis['DIFF_DELETE'] = DIFF_DELETE;
+globalThis['DIFF_INSERT'] = DIFF_INSERT;
+globalThis['DIFF_EQUAL'] = DIFF_EQUAL;

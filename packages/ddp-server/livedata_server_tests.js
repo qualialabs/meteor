@@ -295,10 +295,10 @@ Tinytest.addAsync(
         let testsLength = 0;
 
         onSubscriptions = function (subscription) {
-          onSubscriptions = undefined;
           clientConn.disconnect();
           testsLength++;
           if(testsLength == 3){
+            onSubscriptions = undefined;
             onComplete();
           }
         };
@@ -387,7 +387,6 @@ Tinytest.addAsync(
         })
       );
     });
-
     Promise.all([
       clientCallPromise,
       clientCallRejectedPromise,

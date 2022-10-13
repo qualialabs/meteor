@@ -79,13 +79,13 @@ exports.makeCompatible = function (Promise, Fiber) {
 
     var run = fiber.run;
     var throwInto = fiber.throwInto;
-  
+
     if (process.domain) {
       run = process.domain.bind(run);
       throwInto = process.domain.bind(throwInto);
     }
     e = new Error();
-    
+
     // The overridden es6PromiseThen function is adequate here because these
     // two callbacks do not need to run in a Fiber.
     es6PromiseThen.call(promise, function (result) {
@@ -138,6 +138,8 @@ exports.makeCompatible = function (Promise, Fiber) {
       callback: fn,
       context: context,
       args: args,
+      _arStore: Promise.getCurrentAsyncStore(),
+      _ar: fiber?._ar,
       dynamics: cloneFiberOwnProperties(fiber)
     }, Promise);
   };
@@ -155,10 +157,14 @@ function wrapCallback(callback, Promise) {
   }
 
   var dynamics = cloneFiberOwnProperties(Promise.Fiber.current);
+  const _ar = Promise.Fiber.current?._ar;
+  const _arStore = Promise.getCurrentAsyncStore();
   var result = function (arg) {
     var promise = fiberPool.run({
       callback: callback,
       args: [arg], // Avoid dealing with arguments objects.
+      _ar,
+      _arStore: _arStore,
       dynamics: dynamics
     }, Promise);
 
