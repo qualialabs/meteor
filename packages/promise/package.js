@@ -8,7 +8,7 @@ Package.describe({
 
 Npm.depends({
   // TODO: can we just drop this now?
-  "meteor-promise": "file:///home/zacknewsham/Sites/meteor/npm-packages/meteor-promise",
+  "meteor-promise": "0.9.1",
   "promise": "8.1.0"
 });
 

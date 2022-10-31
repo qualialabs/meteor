@@ -91,7 +91,6 @@ exports.makeCompatible = function (Promise, Fiber) {
     es6PromiseThen.call(promise, function (result) {
       tryCatchNextTick(fiber, run, [result]);
     }, function (error) {
-      console.error(e);
       tryCatchNextTick(fiber, throwInto, [error]);
     });
 
@@ -139,7 +138,6 @@ exports.makeCompatible = function (Promise, Fiber) {
       context: context,
       args: args,
       _arStore: Promise.getCurrentAsyncStore(),
-      _ar: fiber?._ar,
       dynamics: cloneFiberOwnProperties(fiber)
     }, Promise);
   };
@@ -157,13 +155,11 @@ function wrapCallback(callback, Promise) {
   }
 
   var dynamics = cloneFiberOwnProperties(Promise.Fiber.current);
-  const _ar = Promise.Fiber.current?._ar;
   const _arStore = Promise.getCurrentAsyncStore();
   var result = function (arg) {
     var promise = fiberPool.run({
       callback: callback,
       args: [arg], // Avoid dealing with arguments objects.
-      _ar,
       _arStore: _arStore,
       dynamics: dynamics
     }, Promise);

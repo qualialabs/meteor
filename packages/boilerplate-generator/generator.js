@@ -118,7 +118,7 @@ export class Boilerplate {
 
     manifest.forEach(item => {
       const urlPath = urlMapper(item.url);
-      const itemObj = { url: urlPath };
+      const itemObj = { url: urlPath, type: item.type };
 
       if (inline) {
         itemObj.scriptContent = readUtf8FileSync(
@@ -132,7 +132,7 @@ export class Boilerplate {
         boilerplateBaseData.css.push(itemObj);
       }
 
-      if (item.type === 'js' && item.where === 'client' &&
+      if ((item.type === 'js' || item.type === 'module js') && item.where === 'client' &&
         // Dynamic JS modules should not be loaded eagerly in the
         // initial HTML of the app.
         !item.path.startsWith('dynamic/')) {

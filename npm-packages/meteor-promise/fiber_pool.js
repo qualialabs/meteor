@@ -50,8 +50,10 @@ function FiberPool(targetFiberCount) {
             entry.context || null,
             entry.args || []
           ));
+          Promise.setCurrentAsyncStore(undefined);
         } catch (error) {
           entry.reject(error);
+          Promise.setCurrentAsyncStore(undefined);
         }
 
         // Remove all own properties of the fiber before returning it to
@@ -101,9 +103,6 @@ function FiberPool(targetFiberCount) {
       entry.resolve = resolve;
       entry.reject = reject;
     });
-    if (entry._ar) {
-      fiber._ar = entry._ar;
-    }
     fiber.run(entry);
 
     return promise;

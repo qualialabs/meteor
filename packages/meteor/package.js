@@ -54,6 +54,7 @@ Package.onUse(function (api) {
   // People expect process.exit() to not swallow console output.
   // On Windows, it sometimes does, so we fix it for all apps and packages
   api.addFiles('flush-buffers-on-exit-in-windows.js', 'server');
+  api.addFiles('process.js');
 });
 
 Package.onTest(function (api) {

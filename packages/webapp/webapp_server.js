@@ -689,7 +689,7 @@ WebAppInternals.staticFilesMiddleware = async function(
     );
   }
 
-  if (info.type === 'js' || info.type === 'dynamic js') {
+  if (info.type === 'js' || info.type === 'dynamic js' || info.type === 'module js') {
     res.setHeader('Content-Type', 'application/javascript; charset=UTF-8');
   } else if (info.type === 'css') {
     res.setHeader('Content-Type', 'text/css; charset=UTF-8');
@@ -1368,7 +1368,7 @@ function runWebAppServer() {
     },
   });
   WebAppInternals.reloadClientPrograms();
-  
+
   // Let the rest of the packages (and Meteor.startup hooks) insert connect
   // middlewares and update __meteor_runtime_config__, then keep going to set up
   // actually serving HTML.
