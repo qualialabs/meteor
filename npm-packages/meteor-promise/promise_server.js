@@ -137,7 +137,6 @@ exports.makeCompatible = function (Promise, Fiber) {
       callback: fn,
       context: context,
       args: args,
-      _arStore: Promise.getCurrentAsyncStore(),
       dynamics: cloneFiberOwnProperties(fiber)
     }, Promise);
   };
@@ -155,12 +154,10 @@ function wrapCallback(callback, Promise) {
   }
 
   var dynamics = cloneFiberOwnProperties(Promise.Fiber.current);
-  const _arStore = Promise.getCurrentAsyncStore();
   var result = function (arg) {
     var promise = fiberPool.run({
       callback: callback,
       args: [arg], // Avoid dealing with arguments objects.
-      _arStore: _arStore,
       dynamics: dynamics
     }, Promise);
 

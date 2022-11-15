@@ -57,7 +57,7 @@ Tinytest.add("webapp - content-type header", function (test) {
   const jsResource = _.find(
     _.keys(staticFiles),
     function (url) {
-      return staticFiles[url].type === "js";
+      return staticFiles[url].type === "js" || staticFiles[url].type === "module js";
     }
   );
 

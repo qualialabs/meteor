@@ -207,11 +207,13 @@ Object.assign(OplogHandle.prototype, {
     // it only needs to make one underlying TCP connection.
     self._oplogTailConnection = new MongoConnection(
       self._oplogUrl, {maxPoolSize: 1});
+    Promise.await(self._oplogTailConnection._connectPromise);
     // XXX better docs, but: it's to get monotonic results
     // XXX is it safe to say "if there's an in flight query, just use its
     //     results"? I don't think so but should consider that
     self._oplogLastEntryConnection = new MongoConnection(
       self._oplogUrl, {maxPoolSize: 1});
+    Promise.await(self._oplogLastEntryConnection._connectPromise);
 
     // Now, make sure that there actually is a repl set here. If not, oplog
     // tailing won't ever find anything!

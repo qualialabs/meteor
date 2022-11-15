@@ -1,4 +1,5 @@
 var assert = require("assert");
+const { AsyncResource } = require("async_hooks");
 
 function FiberPool(targetFiberCount) {
   assert.ok(this instanceof FiberPool);
@@ -26,7 +27,6 @@ function FiberPool(targetFiberCount) {
           // continue waiting for the next entry object.
           continue;
         }
-
         // Ensure this Fiber is no longer in the pool once it begins to
         // execute an entry.
         assert.strictEqual(fiberStack.indexOf(fiber), -1);
@@ -38,22 +38,14 @@ function FiberPool(targetFiberCount) {
             fiber[key] = entry.dynamics[key];
           });
         }
-        if (entry._arStore) {
-          Promise.setCurrentAsyncStore(entry._arStore);
-        }
-        else {
-          Promise.setCurrentAsyncStore(undefined);
-        }
 
         try {
-          entry.resolve(entry.callback.apply(
+          entry.resolve(entry._ar.runInAsyncScope(() => entry.callback.apply(
             entry.context || null,
             entry.args || []
-          ));
-          Promise.setCurrentAsyncStore(undefined);
+          )));
         } catch (error) {
           entry.reject(error);
-          Promise.setCurrentAsyncStore(undefined);
         }
 
         // Remove all own properties of the fiber before returning it to
@@ -87,7 +79,7 @@ function FiberPool(targetFiberCount) {
   this.run = function (entry, Promise) {
     assert.strictEqual(typeof entry, "object");
     assert.strictEqual(typeof entry.callback, "function");
-
+    entry._ar = new AsyncResource("FiberPoolJob");
     if (typeof Promise.Fiber !== "function") {
       return new Promise(function (resolve) {
         resolve(entry.callback.apply(

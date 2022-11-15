@@ -1,13 +1,9 @@
 // Fiber-aware implementation of dynamic scoping, for use on the server
-import { AsyncLocalStorage } from "async_hooks";
+import { AsyncLocalStorage, AsyncResource, executionAsyncId } from "async_hooks";
 
 const __async_meteor_dynamics = new AsyncLocalStorage();
-
-// TODO: hackiest of hacks - this is necessary for the fiber-pool meteor implements,
-// it isn't enough to just set the current "async resource" since the original method may have gone out of scope.
-// we need to track the actual store values too.
-Promise.getCurrentAsyncStore = () => __async_meteor_dynamics.getStore();
-Promise.setCurrentAsyncStore = (store) => __async_meteor_dynamics.enterWith(store);
+// for debugging only
+globalThis.__async_meteor_dynamics = __async_meteor_dynamics;
 var Fiber = Npm.require('fibers');
 
 var nextSlot = 0;
@@ -74,7 +70,18 @@ EVp.getOrNullIfOutsideFiber = function () {
 EVp.withValue = function (value, func) {
   const current = (__async_meteor_dynamics.getStore() || []).slice();
   current[this.slot] = value;
-  return __async_meteor_dynamics.run(current, func);
+  if (!Fiber.current) {
+    // this is necessary as if we aren't in a fiber, the current async scope may be poluted
+    // particularly bad if this is the root async scope - which it often is inside a fiber
+    // in the future we may loosen this restriction to only require there be a current fiber if
+    // the current executionAsyncId == 0 (e.g., the root) - this will allow us to call withValue
+    // after an await without poluting the root AsyncResource. However, this may not resolve the concerns
+    // of poluting some other shared async resource.
+    // running the full meteor test suite (in particular, mongo and ddp*) multiple times in a single build
+    // should expose any flaws with changes made here.
+    throw new Error('You can\'t call withValue from outside a Fiber. Perhaps you awaited something before calling this?');
+  }
+  return Fiber.current.runInAsyncScope(() => __async_meteor_dynamics.run(current, func));
 };
 
 // Meteor application code is always supposed to be run inside a
@@ -127,16 +134,19 @@ Meteor.bindEnvironment = function (func, onException, _this) {
     var args = Array.prototype.slice.call(arguments);
 
     var runWithEnvironment = function () {
-      try {
-        return __async_meteor_dynamics.run(boundValues.slice(), () => func.call(_this, ...args));
-      }
-      catch (e) {
-        __async_meteor_dynamics.run(boundValues.slice(), () => onException(e));
-      }
+      return new AsyncResource('MeteorBoundEnvironment').runInAsyncScope(() => {
+        try {
+          return __async_meteor_dynamics.run(boundValues.slice(), () => func.call(_this, ...args));
+        }
+        catch (e) {
+          __async_meteor_dynamics.run(boundValues.slice(), () => onException(e));
+        }
+      });
     };
 
     if (Fiber.current)
       return runWithEnvironment();
+
     Fiber(runWithEnvironment).run();
   };
 };

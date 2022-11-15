@@ -3298,7 +3298,8 @@ Meteor.isServer && Tinytest.add(
   "mongo-livedata - connection failure throws",
   function (test) {
     test.throws(function () {
-      new MongoInternals.Connection('mongodb://this-does-not-exist.test/asdf');
+      const con = new MongoInternals.Connection('mongodb://this-does-not-exist.test/asdf');
+      Promise.await(con._connectPromise);
     });
   }
 );

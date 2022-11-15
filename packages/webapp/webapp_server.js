@@ -52,6 +52,7 @@ WebApp.defaultArch = 'web.browser.legacy';
 // XXX maps archs to manifests
 WebApp.clientPrograms = {};
 
+WebApp.waitForReady = async () => await mainPromise;
 // XXX maps archs to program path on filesystem
 var archPath = {};
 
@@ -1022,7 +1023,7 @@ function runWebAppServer() {
     // Meteor/Cordova for the Hot-Code Push and since the file will be served by
     // the device's server, it is important to set the DDP url to the actual
     // Meteor server accepting DDP connections and not the device's file server.
-    syncQueue.queueTask(function() {
+    syncQueue.runTask(function() {
       Object.keys(WebApp.clientPrograms).forEach(generateBoilerplateForArch);
     });
   };

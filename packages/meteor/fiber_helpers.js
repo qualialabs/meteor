@@ -72,7 +72,7 @@ SQp.runTask = function (task) {
       throw e;
     }),
     future: fut,
-    name: task.name
+    name: task.name,
   };
   self._taskHandles.push(handle);
   self._scheduleRun();
@@ -85,7 +85,7 @@ SQp.queueTask = function (task) {
   var self = this;
   self._taskHandles.push({
     task: task,
-    name: task.name
+    name: task.name,
   });
   self._scheduleRun();
   // No need to block.
@@ -154,6 +154,9 @@ SQp._run = function () {
     } else {
       Meteor._debug("Exception in queued task", err);
     }
+  }
+  if (globalThis.__async_meteor_dynamics.getStore()) {
+    debugger;
   }
   self._currentTaskFiber = undefined;
 

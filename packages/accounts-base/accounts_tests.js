@@ -13,7 +13,7 @@ Meteor.methods({
 // *are* validated, but Accounts._options is global state which makes this hard
 // (impossible?)
 Tinytest.add(
-  'accounts - config validates keys', 
+  'accounts - config validates keys',
   test => test.throws(() => Accounts.config({foo: "bar"}))
 );
 
@@ -202,7 +202,7 @@ Tinytest.add('accounts - insertUserDoc username', test => {
 
   // run the hook again. now the user exists, so it throws an error.
   test.throws(
-    () => Accounts.insertUserDoc({profile: {name: 'Foo Bar'}}, userIn), 
+    () => Accounts.insertUserDoc({profile: {name: 'Foo Bar'}}, userIn),
     'Username already exists.'
   );
 
@@ -238,13 +238,13 @@ Tinytest.add('accounts - insertUserDoc email', test => {
   );
 
   // now with only one of them.
-  test.throws(() => 
-    Accounts.insertUserDoc({}, {emails: [{address: email1}]}), 
+  test.throws(() =>
+    Accounts.insertUserDoc({}, {emails: [{address: email1}]}),
     'Email already exists.'
   );
 
-  test.throws(() => 
-    Accounts.insertUserDoc({}, {emails: [{address: email2}]}), 
+  test.throws(() =>
+    Accounts.insertUserDoc({}, {emails: [{address: email2}]}),
     'Email already exists.'
   );
 
@@ -452,14 +452,14 @@ Tinytest.add(
       test.equal(Meteor.userId(), validateAttemptExpectedUserId, "validateLoginAttempt");
       return true;
     });
-    const onLoginStopper = Accounts.onLogin(attempt => 
+    const onLoginStopper = Accounts.onLogin(attempt =>
       test.equal(Meteor.userId(), onLoginExpectedUserId, "onLogin")
     );
     const onLogoutStopper = Accounts.onLogout(logoutContext => {
       test.equal(logoutContext.user._id, onLogoutExpectedUserId, "onLogout");
       test.instanceOf(logoutContext.connection, Object);
     });
-    const onLoginFailureStopper = Accounts.onLoginFailure(attempt => 
+    const onLoginFailureStopper = Accounts.onLoginFailure(attempt =>
       test.equal(Meteor.userId(), onLoginFailureExpectedUserId, "onLoginFailure")
     );
 
@@ -700,16 +700,16 @@ Tinytest.add(
   'accounts - verify setAdditionalFindUserOnExternalLogin hook can provide user',
   test => {
       // create test user, without a google service
-      const testEmail = "test@testdomain.com"
+      const testEmail = "test@testdomain.com" + Random.id();
       const uid0 = Accounts.createUser({email: testEmail})
-      
+
       // Verify that user is found from email and service merged
       Accounts.setAdditionalFindUserOnExternalLogin(({serviceName, serviceData}) => {
         if (serviceName === "google") {
           return Accounts.findUserByEmail(serviceData.email)
         }
       })
-      
+
       let googleId = Random.id();
       const uid1 = Accounts.updateOrCreateUserFromExternalService(
           'google',
