@@ -1,6 +1,6 @@
 Package.describe({
   summary: "Collection of small helpers: _.map, _.each, ...",
-  version: '1.0.10'
+  version: '1.0.11'
 });
 
 Package.onUse(function (api) {
@@ -26,9 +26,9 @@ Package.onUse(function (api) {
   // return value, document.images, and 'arguments') such that objects with a
   // numeric length field whose constructor === Object are still treated as
   // objects, not as arrays.  Search for looksLikeArray.
-
-  // can't use mainModule because that should be reserved for actual esm
   api.addFiles(['pre.js']);
+
+  api.addAssets('underscore.d.ts', 'server');
 });
 
 

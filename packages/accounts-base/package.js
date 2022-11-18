@@ -1,6 +1,6 @@
 Package.describe({
   summary: 'A user account system',
-  version: '2.2.1',
+  version: '2.2.5',
 });
 
 Package.onUse(api => {
@@ -48,6 +48,8 @@ Package.onUse(api => {
   // modules that import the accounts-base package.
   api.mainModule('server_main.js', 'server');
   api.mainModule('client_main.js', 'client');
+
+  api.addAssets('accounts-base.d.ts', 'server');
 });
 
 Package.onTest(api => {
@@ -60,6 +62,7 @@ Package.onTest(api => {
     'oauth-encryption',
     'ddp',
     'accounts-password',
+    'accounts-2fa',
   ]);
 
   api.addFiles('accounts_tests_setup.js', 'server');

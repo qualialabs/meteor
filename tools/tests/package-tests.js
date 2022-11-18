@@ -3,10 +3,7 @@ var _= require('underscore');
 var selftest = require('../tool-testing/selftest.js');
 var Sandbox = selftest.Sandbox;
 var files = require('../fs/files');
-var testUtils = require('../tool-testing/test-utils.js');
 var utils = require('../utils/utils.js');
-var packageClient = require('../packaging/package-client.js');
-var catalog = require('../packaging/catalog/catalog.js');
 
 var username = "test";
 
@@ -357,15 +354,15 @@ selftest.define("add packages client archs", function (options) {
 
     s.testWithAllClients(function (run) {
       var expectedLogNum = 0;
-      run.waitSecs(5);
+      run.waitSecs(10);
       run.match("myapp");
       run.match("proxy");
-      run.waitSecs(5);
+      run.waitSecs(10);
       run.match("running at");
       run.match("localhost");
 
       run.connectClient();
-      run.waitSecs(20);
+      run.waitSecs(40);
       run.match("all clients " + (expectedLogNum++));
       run.match(clientType + " client " + (expectedLogNum++));
       run.stop();

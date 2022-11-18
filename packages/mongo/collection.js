@@ -1,5 +1,9 @@
 // options.connection, if given, is a LivedataClient or LivedataServer
 // XXX presently there is no way to destroy/clean up a Collection
+import {
+  ASYNC_COLLECTION_METHODS,
+  getAsyncMethodName
+} from "meteor/minimongo/constants";
 
 import { normalizeProjection } from "./mongo_utils";
 import { Log } from 'meteor/logging';
@@ -765,7 +769,17 @@ Object.assign(Mongo.Collection.prototype, {
     var self = this;
     if (!self._collection.createIndex)
       throw new Error('Can only call createIndex on server collections');
-    self._collection.createIndex(index, options);
+    try {
+      self._collection.createIndex(index, options);
+    } catch (e) {
+      if (e.message.includes('An equivalent index already exists with the same name but different options.') && Meteor.settings?.packages?.mongo?.reCreateIndexOnOptionMismatch) {
+        Log.info(`Re-creating index ${index} for ${self._name} due to options mismatch.`);
+        self._collection._dropIndex(index);
+        self._collection.createIndex(index, options);
+      } else {
+        throw new Meteor.Error(`An error occurred when creating an index for collection "${self._name}: ${e.message}`);
+      }
+    }
   },
 
   _dropIndex(index) {
@@ -880,3 +894,10 @@ function popCallbackFromArgs(args) {
     return args.pop();
   }
 }
+
+ASYNC_COLLECTION_METHODS.forEach(methodName => {
+  const methodNameAsync = getAsyncMethodName(methodName);
+  Mongo.Collection.prototype[methodNameAsync] = function(...args) {
+    return Promise.resolve(this[methodName](...args));
+  };
+});

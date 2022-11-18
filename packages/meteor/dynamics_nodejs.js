@@ -84,6 +84,31 @@ EVp.withValue = function (value, func) {
   return Fiber.current.runInAsyncScope(() => __async_meteor_dynamics.run(current, func));
 };
 
+/**
+ * @summary Set the environment variable to the given value while a function is run
+ * @locus Anywhere
+ * @method withValueAsync
+ * @memberof Meteor.EnvironmentVariable
+ * @param {Any} value Value the environment variable should be set to
+ * @param {Function} func The function to run
+ * @return {Any} Return value of function
+ */
+
+EVp._set = function (context) {
+  Meteor._nodeCodeMustBeInFiber();
+  __async_meteor_dynamics.getStore()[this.slot] = context;
+};
+
+EVp._setNewContextAndGetCurrent = function (value) {
+  Meteor._nodeCodeMustBeInFiber();
+  if (!__async_meteor_dynamics.getStore()) {
+    __async_meteor_dynamics.enterWith([]);
+  }
+  const saved = __async_meteor_dynamics.getStore()[this.slot];
+  this._set(value);
+  return saved;
+};
+
 // Meteor application code is always supposed to be run inside a
 // fiber. bindEnvironment ensures that the function it wraps is run from
 // inside a fiber and ensures it sees the values of Meteor environment

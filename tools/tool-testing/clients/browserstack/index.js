@@ -1,23 +1,17 @@
-import { execFile } from 'child_process';
 import Client from '../../client.js';
 import configuredClients from "./clients.js";
 import { enterJob } from '../../../utils/buildmessage.js';
-import { getUrlWithResuming } from '../../../utils/http-helpers.js';
 import { execFileSync } from '../../../utils/processes';
 import { ensureDependencies } from '../../../cli/dev-bundle-helpers.js';
 import {
   mkdtemp,
   pathJoin,
-  chmod,
-  statOrNull,
   readFile,
-  createWriteStream,
-  getDevBundle,
 } from '../../../fs/files';
 
 const NPM_DEPENDENCIES = {
-  'browserstack-webdriver': '2.41.1',
-  'browserstack-local': '1.3.0',
+  'selenium-webdriver': '4.1.1',
+  'browserstack-local': '1.4.8',
 };
 
 const USER = 'dev1141';
@@ -35,7 +29,7 @@ export default class BrowserStackClient extends Client {
       ensureDependencies(NPM_DEPENDENCIES);
     });
 
-    this.npmPackageExports = require('browserstack-webdriver');
+    this.npmPackageExports = require('selenium-webdriver');
 
     // Capabilities which are allowed by selenium.
     this.config.seleniumOptions =
@@ -72,7 +66,6 @@ export default class BrowserStackClient extends Client {
       // Authentication
       'browserstack.user': USER,
       'browserstack.key': key,
-
       // Use the BrowserStackLocal tunnel, to allow BrowserStack to
       // tunnel to the machine this server is running on.
       'browserstack.local': true,

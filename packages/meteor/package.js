@@ -2,7 +2,7 @@
 
 Package.describe({
   summary: "Core Meteor environment",
-  version: '1.10.0'
+  version: '1.10.2'
 });
 
 Package.registerBuildPlugin({
@@ -55,6 +55,8 @@ Package.onUse(function (api) {
   // On Windows, it sometimes does, so we fix it for all apps and packages
   api.addFiles('flush-buffers-on-exit-in-windows.js', 'server');
   api.addFiles('process.js');
+
+  api.addAssets('meteor.d.ts', 'server');
 });
 
 Package.onTest(function (api) {

@@ -552,7 +552,8 @@ Tinytest.add(
   'accounts - Meteor.user() obeys options.defaultFieldSelector',
   test => {
     const ignoreFieldName = "bigArray";
-    const userId = Accounts.insertUserDoc({}, { username: Random.id(), [ignoreFieldName]: [1] });
+    const customField = "customField";
+    const userId = Accounts.insertUserDoc({}, { username: Random.id(), [ignoreFieldName]: [1], [customField]: 'test' });
     const stampedToken = Accounts._generateStampedLoginToken();
     Accounts._insertLoginToken(userId, stampedToken);
     const options = Accounts._options;
@@ -588,6 +589,15 @@ Tinytest.add(
     user = Meteor.user({fields: {}});
     test.isNotUndefined(user[ignoreFieldName], 'full selector');
     test.isNotUndefined(user.username, 'full selector username');
+
+    Accounts._options = {};
+
+    // Test that a custom field gets retrieved properly
+    Accounts.config({defaultFieldSelector: {[customField]: 1}});
+    user = Meteor.user()
+    test.isNotUndefined(user[customField]);
+    test.isUndefined(user.username);
+    test.isUndefined(user[ignoreFieldName]);
 
     Accounts._options = options;
     Accounts.userId = origAccountsUserId;

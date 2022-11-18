@@ -120,6 +120,7 @@ function getCaller(calleeName) {
   });
   return caller;
 }
+function getMinimumBrowserVersions() { return minimumVersions; }
 
 function calculateHashOfMinimumVersions() {
   return createHash('sha1')
@@ -129,6 +130,7 @@ function calculateHashOfMinimumVersions() {
 export {
   isModern,
   setMinimumBrowserVersions,
+  getMinimumBrowserVersions,
   calculateHashOfMinimumVersions
 };
 

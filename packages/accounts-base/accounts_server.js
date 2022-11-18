@@ -219,7 +219,7 @@ export class AccountsServer extends AccountsCommon {
   }
 
   _validateLogin(connection, attempt) {
-    this._validateLoginHook.each(callback => {
+    this._validateLoginHook.forEach(callback => {
       let ret;
       try {
         ret = callback(cloneAttemptWithConnection(connection, attempt));
@@ -318,7 +318,7 @@ export class AccountsServer extends AccountsCommon {
       // If user is not found, try a case insensitive lookup
       if (!user) {
         selector = this._selectorForFastCaseInsensitiveLookup(fieldName, fieldValue);
-        const candidateUsers = Meteor.users.find(selector, options).fetch();
+        const candidateUsers = Meteor.users.find(selector, { ...options, limit: 2 }).fetch();
         // No match if multiple candidates are found
         if (candidateUsers.length === 1) {
           user = candidateUsers[0];
@@ -547,19 +547,14 @@ export class AccountsServer extends AccountsCommon {
   /// LOGIN HANDLERS
   ///
 
-  // The main entry point for auth packages to hook in to login.
-  //
-  // A login handler is a login method which can return `undefined` to
-  // indicate that the login request is not handled by this handler.
-  //
-  // @param name {String} Optional.  The service name, used by default
-  // if a specific service name isn't returned in the result.
-  //
-  // @param handler {Function} A function that receives an options object
-  // (as passed as an argument to the `login` method) and returns one of:
-  // - `undefined`, meaning don't handle;
-  // - a login method result object
-
+  /**
+   * @summary Registers a new login handler.
+   * @locus Server
+   * @param {String} [name] The type of login method like oauth, password, etc.
+   * @param {Function} handler A function that receives an options object
+   * (as passed as an argument to the `login` method) and returns one of
+   * `undefined`, meaning don't handle or a login method result object.
+   */
   registerLoginHandler(name, handler) {
     if (! handler) {
       handler = name;
@@ -765,13 +760,22 @@ export class AccountsServer extends AccountsCommon {
     // Use Meteor.startup to give other packages a chance to call
     // setDefaultPublishFields.
     Meteor.startup(() => {
+      // Merge custom fields selector and default publish fields so that the client
+      // gets all the necessary fields to run properly
+      const customFields = this._addDefaultFieldSelector().fields || {};
+      const keys = Object.keys(customFields);
+      // If the custom fields are negative, then ignore them and only send the necessary fields
+      const fields = keys.length > 0 && customFields[keys[0]] ? {
+        ...this._addDefaultFieldSelector().fields,
+        ..._defaultPublishFields.projection
+      } : _defaultPublishFields.projection
       // Publish the current user's record to the client.
       this._server.publish(null, function () {
         if (this.userId) {
           return users.find({
             _id: this.userId
           }, {
-            fields: _defaultPublishFields.projection,
+            fields,
           });
         } else {
           return null;
@@ -1468,9 +1472,9 @@ export class AccountsServer extends AccountsCommon {
     return userId;
   }
 
-  _handleError = (msg, throwError = true) => {
+  _handleError = (msg, throwError = true, errorCode = 403) => {
     const error = new Meteor.Error(
-      403,
+      errorCode,
       this._options.ambiguousErrorMessages
         ? "Something went wrong. Please check your credentials."
         : msg
