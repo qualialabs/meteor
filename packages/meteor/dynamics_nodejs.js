@@ -104,7 +104,7 @@ EVp._setNewContextAndGetCurrent = function (value) {
   if (!__async_meteor_dynamics.getStore()) {
     __async_meteor_dynamics.enterWith([]);
   }
-  const saved = __async_meteor_dynamics.getStore()[this.slot];
+  const saved = this.get();
   this._set(value);
   return saved;
 };
