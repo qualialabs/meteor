@@ -1339,9 +1339,6 @@ LocalCollection._observeFromObserveChanges = (cursor, observeCallbacks) => {
   // So we can mark it as safe to reduce the ejson clones.
   // This is tested by the `mongo-livedata - (extended) scribbling` tests
   changeObserver.applyChange._fromObserve = true;
-  if (suppressed) {
-    changeObserver.applyChange._suppress_initial = true;
-  }
 
   const handle = cursor.observeChanges(changeObserver.applyChange,
     { nonMutatingCallbacks: true });
