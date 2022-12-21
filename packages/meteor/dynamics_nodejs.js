@@ -19,6 +19,12 @@ Meteor._nodeCodeMustBeInFiber = function () {
   }
 };
 
+Object.defineProperty(Fiber.prototype, '_meteor_dynamics', {
+  get() {
+    return __async_meteor_dynamics.getStore() || [];
+  }
+});
+
 /**
  * @memberOf Meteor
  * @summary Constructor for EnvironmentVariable
