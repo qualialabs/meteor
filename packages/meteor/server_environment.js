@@ -21,6 +21,9 @@ Meteor = {
   isModern: true
 };
 
+// a true global, so we don't have to import it everywhere (which fights with esbuild define)
+globalThis.Meteor = Meteor;
+
 Meteor.settings = {};
 
 if (process.env.METEOR_SETTINGS) {
