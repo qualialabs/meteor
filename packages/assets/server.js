@@ -11,6 +11,11 @@ export function createAssets(moduleId) {
       return Fiber.current
         ? Promise.await(fsPromises.readFile(path.join(basePath, file))).toString()
         : fs.readFileSync(path.join(basePath, file)).toString();
+    },
+    getBinary(file) {
+      return Fiber.current
+        ? Promise.await(fsPromises.readFile(path.join(basePath, file))).toString()
+        : fs.readFileSync(path.join(basePath, file)).toString();
     }
   }
 };
