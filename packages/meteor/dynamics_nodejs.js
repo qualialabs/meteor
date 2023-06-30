@@ -21,9 +21,17 @@ Meteor._nodeCodeMustBeInFiber = function () {
 
 Object.defineProperty(Fiber.prototype, '_meteor_dynamics', {
   get() {
-    return __async_meteor_dynamics.getStore() || [];
+    return __async_meteor_dynamics.getStore();
+  },
+  set(store) {
+    // opinionated - but there are no situations I can think of where we want to set the root _meteor_dynamics.
+    if (executionAsyncId() === 0) {
+      throw new Error('Trying to call Fiber.current._meteor_dynamics = [...] at the global execution ID');
+    }
+    __async_meteor_dynamics.enterWith(store);
   }
 });
+
 
 /**
  * @memberOf Meteor
@@ -76,18 +84,12 @@ EVp.getOrNullIfOutsideFiber = function () {
 EVp.withValue = function (value, func) {
   const current = (__async_meteor_dynamics.getStore() || []).slice();
   current[this.slot] = value;
-  if (!Fiber.current) {
-    // this is necessary as if we aren't in a fiber, the current async scope may be poluted
-    // particularly bad if this is the root async scope - which it often is inside a fiber
-    // in the future we may loosen this restriction to only require there be a current fiber if
-    // the current executionAsyncId == 0 (e.g., the root) - this will allow us to call withValue
-    // after an await without poluting the root AsyncResource. However, this may not resolve the concerns
-    // of poluting some other shared async resource.
+  if (!Fiber.current && executionAsyncId() === 0) {
     // running the full meteor test suite (in particular, mongo and ddp*) multiple times in a single build
     // should expose any flaws with changes made here.
     throw new Error('You can\'t call withValue from outside a Fiber. Perhaps you awaited something before calling this?');
   }
-  return Fiber.current.runInAsyncScope(() => __async_meteor_dynamics.run(current, func));
+  return __async_meteor_dynamics.run(current, func);
 };
 
 /**
