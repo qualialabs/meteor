@@ -155,9 +155,6 @@ SQp._run = function () {
       Meteor._debug("Exception in queued task", err);
     }
   }
-  if (globalThis.__async_meteor_dynamics.getStore()) {
-    debugger;
-  }
   self._currentTaskFiber = undefined;
 
   // Soon, run the next task, if there is any.
