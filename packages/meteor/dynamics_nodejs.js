@@ -148,9 +148,6 @@ EVp._setNewContextAndGetCurrent = function (value) {
  * @return {Function} The wrapped function
  */
 Meteor.bindEnvironment = function (func, onException, _this) {
-  var dynamics = __async_meteor_dynamics.getStore();
-  var boundValues = dynamics ? dynamics.slice() : [];
-
   if (!onException || typeof(onException) === 'string') {
     var description = onException || "callback of async function";
     onException = function (error) {
@@ -163,16 +160,17 @@ Meteor.bindEnvironment = function (func, onException, _this) {
     throw new Error('onException argument must be a function, string or undefined for Meteor.bindEnvironment().');
   }
 
+  const boundEnvironmentAR = new AsyncResource('MeteorBoundEnvironment');
   return function (/* arguments */) {
     var args = Array.prototype.slice.call(arguments);
 
     var runWithEnvironment = function () {
-      return new AsyncResource('MeteorBoundEnvironment').runInAsyncScope(() => {
+      return boundEnvironmentAR.runInAsyncScope(() => {
         try {
-          return __async_meteor_dynamics.run(boundValues.slice(), () => func.call(_this, ...args));
+          return func.call(_this, ...args);
         }
         catch (e) {
-          __async_meteor_dynamics.run(boundValues.slice(), () => onException(e));
+          onException(e);
         }
       });
     };
