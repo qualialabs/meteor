@@ -84,8 +84,6 @@ exports.makeCompatible = function (Promise, Fiber) {
       run = process.domain.bind(run);
       throwInto = process.domain.bind(throwInto);
     }
-    e = new Error();
-
     // The overridden es6PromiseThen function is adequate here because these
     // two callbacks do not need to run in a Fiber.
     es6PromiseThen.call(promise, function (result) {
