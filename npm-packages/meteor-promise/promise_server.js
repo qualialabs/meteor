@@ -3,6 +3,7 @@ var fiberPool = require("./fiber_pool.js").makePool();
 
 exports.makeCompatible = function (Promise, Fiber) {
   var es6PromiseThen = Promise.prototype.then;
+  Promise.prototype.es6PromiseThen = es6PromiseThen;
 
   if (typeof Fiber === "function") {
     Promise.Fiber = Fiber;
@@ -16,6 +17,9 @@ exports.makeCompatible = function (Promise, Fiber) {
     var Promise = this.constructor;
     var Fiber = Promise.Fiber;
 
+    if (Promise.noYieldOnFiberlessThen && Fiber && !Fiber.current) {
+      return es6PromiseThen.call(this, onResolved, onRejected);
+    }
     if (typeof Fiber === "function" &&
         ! this._meteorPromiseAlreadyWrapped) {
       onResolved = wrapCallback(onResolved, Promise);

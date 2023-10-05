@@ -1,6 +1,6 @@
 Package.describe({
   name: "promise",
-  version: "0.12.1-1",
+  version: "0.12.1-2",
   summary: "ECMAScript 2015 Promise polyfill with Fiber support",
   git: "https://github.com/meteor/promise",
   documentation: "README.md"
@@ -8,7 +8,7 @@ Package.describe({
 
 Npm.depends({
   // TODO: can we just drop this now?
-  "meteor-promise": "0.9.1-1",
+  "meteor-promise": "0.9.1-2",
   "promise": "8.1.0"
 });
 
