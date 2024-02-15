@@ -465,6 +465,9 @@ export class AccountsServer extends AccountsCommon {
     if (user) {
       attempt.user = user;
     }
+    if (result.options) {
+      attempt.options = result.options;
+    }
 
     // _validateLogin may mutate `attempt` by adding an error and changing allowed
     // to false, but that's the only change it can make (and the user's callbacks
@@ -1842,4 +1845,3 @@ const generateCasePermutationsForString = string => {
   }
   return permutations;
 }
-
