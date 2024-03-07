@@ -6,6 +6,8 @@ import {
   pathsToTree,
   projectionDetails,
 } from './common.js';
+import LocalCollection from './local_collection.js';
+import { Minimongo } from './minimongo_common.js';
 
 Minimongo._pathsElidingNumericKeys = paths => paths.map(path =>
   path.split('.').filter(part => !isNumericKey(part)).join('.')
@@ -344,3 +346,5 @@ function treeToPaths(tree, prefix = '') {
 
   return result;
 }
+
+export { LocalCollection, Minimongo };

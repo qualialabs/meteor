@@ -1299,4 +1299,4 @@
 
   });
 
-}).call(this);
+}).call(this || global);

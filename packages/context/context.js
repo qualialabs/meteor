@@ -6,10 +6,10 @@ const {
   asyncFromGen,
 } = require("@wry/context");
 
-Object.assign(exports, {
+export {
   Slot,
   bind,
   noContext,
   setTimeout,
   asyncFromGen,
-});
+}

@@ -70,6 +70,7 @@ Package.onUse(function (api) {
 
   // Stuff that should be exposed via a real API, but we haven't yet.
   api.export('MongoInternals', 'server');
+  api.export('OplogHandle', 'server');
 
   api.export("Mongo");
   api.export('ObserveMultiplexer', 'server', {testOnly: true});

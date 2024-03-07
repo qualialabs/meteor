@@ -1,4 +1,5 @@
 import LocalCollection from './local_collection.js';
+import Matcher from './matcher.js';
 
 export const hasOwn = Object.prototype.hasOwnProperty;
 
@@ -125,7 +126,7 @@ export const ELEMENT_OPERATORS = {
       }
 
       return value => (
-        value !== undefined && LocalCollection._f._type(value) === operand
+        value !== undefined && Matcher._f._type(value) === operand
       );
     },
   },
@@ -693,7 +694,7 @@ export function equalityElementMatcher(elementSelector) {
     return value => value == null;
   }
 
-  return value => LocalCollection._f._equal(elementSelector, value);
+  return value => Matcher._f._equal(elementSelector, value);
 }
 
 function everythingMatcher(docOrBranchedValues) {
@@ -893,7 +894,7 @@ function makeInequality(cmpValueComparator) {
         operand = null;
       }
 
-      const operandType = LocalCollection._f._type(operand);
+      const operandType = Matcher._f._type(operand);
 
       return value => {
         if (value === undefined) {
@@ -902,11 +903,11 @@ function makeInequality(cmpValueComparator) {
 
         // Comparisons are never true among things of different type (except
         // null vs undefined).
-        if (LocalCollection._f._type(value) !== operandType) {
+        if (Matcher._f._type(value) !== operandType) {
           return false;
         }
 
-        return cmpValueComparator(LocalCollection._f._cmp(value, operand));
+        return cmpValueComparator(Matcher._f._cmp(value, operand));
       };
     },
   };

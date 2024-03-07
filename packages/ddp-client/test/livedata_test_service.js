@@ -157,20 +157,21 @@ Meteor.methods({
 objectsWithUsers = new Mongo.Collection('objectsWithUsers');
 
 if (Meteor.isServer) {
-  objectsWithUsers.remove({});
-  objectsWithUsers.insert({ name: 'owned by none', ownerUserIds: [null] });
-  objectsWithUsers.insert({ name: 'owned by one - a', ownerUserIds: ['1'] });
-  objectsWithUsers.insert({
-    name: 'owned by one/two - a',
-    ownerUserIds: ['1', '2']
+  Meteor.startup(() => {
+    objectsWithUsers.remove({});
+    objectsWithUsers.insert({ name: 'owned by none', ownerUserIds: [null] });
+    objectsWithUsers.insert({ name: 'owned by one - a', ownerUserIds: ['1'] });
+    objectsWithUsers.insert({
+      name: 'owned by one/two - a',
+      ownerUserIds: ['1', '2']
+    });
+    objectsWithUsers.insert({
+      name: 'owned by one/two - b',
+      ownerUserIds: ['1', '2']
+    });
+    objectsWithUsers.insert({ name: 'owned by two - a', ownerUserIds: ['2'] });
+    objectsWithUsers.insert({ name: 'owned by two - b', ownerUserIds: ['2'] });
   });
-  objectsWithUsers.insert({
-    name: 'owned by one/two - b',
-    ownerUserIds: ['1', '2']
-  });
-  objectsWithUsers.insert({ name: 'owned by two - a', ownerUserIds: ['2'] });
-  objectsWithUsers.insert({ name: 'owned by two - b', ownerUserIds: ['2'] });
-
   Meteor.publish('objectsWithUsers', function() {
     return objectsWithUsers.find(
       { ownerUserIds: this.userId },
@@ -332,14 +333,16 @@ One = new Mongo.Collection('collectionOne');
 Two = new Mongo.Collection('collectionTwo');
 
 if (Meteor.isServer) {
-  One.remove({});
-  One.insert({ name: 'value1' });
-  One.insert({ name: 'value2' });
+  Meteor.startup(() => {
+    One.remove({});
+    One.insert({ name: 'value1' });
+    One.insert({ name: 'value2' });
 
-  Two.remove({});
-  Two.insert({ name: 'value3' });
-  Two.insert({ name: 'value4' });
-  Two.insert({ name: 'value5' });
+    Two.remove({});
+    Two.insert({ name: 'value3' });
+    Two.insert({ name: 'value4' });
+    Two.insert({ name: 'value5' });
+  });
 
   Meteor.publish('multiPublish', function(options) {
     // See below to see what options are accepted.

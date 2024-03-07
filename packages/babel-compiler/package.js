@@ -6,6 +6,7 @@ Package.describe({
 
 Npm.depends({
   '@meteorjs/babel': '7.16.0-beta.1',
+  'semver': '7.3.8',
   'json5': '2.1.1'
 });
 

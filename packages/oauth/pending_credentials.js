@@ -16,10 +16,11 @@ OAuth._pendingCredentials = new Mongo.Collection(
     _preventAutopublish: true
   });
 
-OAuth._pendingCredentials.createIndex('key', { unique: true });
-OAuth._pendingCredentials.createIndex('credentialSecret');
-OAuth._pendingCredentials.createIndex('createdAt');
-
+Meteor.startup(() => {
+  OAuth._pendingCredentials.createIndex('key', { unique: true });
+  OAuth._pendingCredentials.createIndex('credentialSecret');
+  OAuth._pendingCredentials.createIndex('createdAt');
+});
 
 
 // Periodically clear old entries that were never retrieved

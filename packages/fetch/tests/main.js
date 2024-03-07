@@ -6,7 +6,7 @@ Tinytest.add("fetch - sanity", function (test) {
 
 Tinytest.addAsync("fetch - asset", function (test) {
   return fetch(
-    Meteor.absoluteUrl("/packages/local-test_fetch/tests/asset.json")
+    Meteor.absoluteUrl("/packages/fetch/tests/asset.json")
   ).then(res => {
     if (! res.ok) throw res;
     return res.json();

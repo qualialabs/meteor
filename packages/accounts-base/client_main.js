@@ -7,7 +7,7 @@ import {
  * @namespace Accounts
  * @summary The namespace for all client-side accounts-related methods.
  */
-Accounts = new AccountsClient();
+const Accounts = new AccountsClient();
 
 /**
  * @summary A [Mongo.Collection](#collections) containing user documents.
@@ -20,9 +20,5 @@ Meteor.users = Accounts.users;
 export {
   Accounts,
   AccountsClient,
-  AccountsTest,
-  // For backwards compatibility. Note that exporting an object as the
-  // default export is *not* the same as exporting its properties as named
-  // exports, as was previously assumed.
-  exports as default,
+  AccountsTest
 };

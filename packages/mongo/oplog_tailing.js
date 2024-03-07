@@ -1,4 +1,5 @@
 var Future = Npm.require('fibers/future');
+import Fiber from 'fibers';
 
 import { NpmModuleMongodb } from "meteor/npm-mongo";
 const { Long } = NpmModuleMongodb;
@@ -82,7 +83,7 @@ OplogHandle = function (oplogUrl, dbName) {
   self._entryQueue = new Meteor._DoubleEndedQueue();
   self._workerActive = false;
 
-  self._startTailing();
+  new Fiber(() => self._startTailing()).run();
 };
 
 Object.assign(OplogHandle.prototype, {
