@@ -1,5 +1,5 @@
 import { Mongo } from 'meteor/mongo';
-import { Meteor } from 'meteor/meteor';
+import { Meteor as BaseMeteor } from 'meteor/meteor';
 
 export interface URLS {
   resetPassword: (token: string) => string;
@@ -8,10 +8,19 @@ export interface URLS {
 }
 
 export interface EmailFields {
-  from?: ((user: Meteor.User) => string) | undefined;
-  subject?: ((user: Meteor.User) => string) | undefined;
-  text?: ((user: Meteor.User, url: string) => string) | undefined;
-  html?: ((user: Meteor.User, url: string) => string) | undefined;
+  from?: ((user: BaseMeteor.User) => string) | undefined;
+  subject?: ((user: BaseMeteor.User) => string) | undefined;
+  text?: ((user: BaseMeteor.User, url: string) => string) | undefined;
+  html?: ((user: BaseMeteor.User, url: string) => string) | undefined;
+}
+
+export namespace Meteor {
+  function user(options?: {
+    fields?: Mongo.FieldSpecifier | undefined;
+  }): BaseMeteor.User | null;
+
+  function userId(): string | null;
+  var users: Mongo.Collection<BaseMeteor.User>;
 }
 
 export namespace Accounts {
@@ -19,7 +28,7 @@ export namespace Accounts {
 
   function user(options?: {
     fields?: Mongo.FieldSpecifier | undefined;
-  }): Meteor.User | null;
+  }): BaseMeteor.User | null;
 
   function userId(): string | null;
 
@@ -30,7 +39,7 @@ export namespace Accounts {
       password?: string | undefined;
       profile?: Object | undefined;
     },
-    callback?: (error?: Error | Meteor.Error | Meteor.TypedError) => void
+    callback?: (error?: Error | BaseMeteor.Error | BaseMeteor.TypedError) => void
   ): string;
 
   function config(options: {
@@ -66,23 +75,23 @@ export namespace Accounts {
   function changePassword(
     oldPassword: string,
     newPassword: string,
-    callback?: (error?: Error | Meteor.Error | Meteor.TypedError) => void
+    callback?: (error?: Error | BaseMeteor.Error | BaseMeteor.TypedError) => void
   ): void;
 
   function forgotPassword(
     options: { email?: string | undefined },
-    callback?: (error?: Error | Meteor.Error | Meteor.TypedError) => void
+    callback?: (error?: Error | BaseMeteor.Error | BaseMeteor.TypedError) => void
   ): void;
 
   function resetPassword(
     token: string,
     newPassword: string,
-    callback?: (error?: Error | Meteor.Error | Meteor.TypedError) => void
+    callback?: (error?: Error | BaseMeteor.Error | BaseMeteor.TypedError) => void
   ): void;
 
   function verifyEmail(
     token: string,
-    callback?: (error?: Error | Meteor.Error | Meteor.TypedError) => void
+    callback?: (error?: Error | BaseMeteor.Error | BaseMeteor.TypedError) => void
   ): void;
 
   function onEmailVerificationLink(callback: Function): void;
@@ -96,11 +105,11 @@ export namespace Accounts {
   function loggingOut(): boolean;
 
   function logout(
-    callback?: (error?: Error | Meteor.Error | Meteor.TypedError) => void
+    callback?: (error?: Error | BaseMeteor.Error | BaseMeteor.TypedError) => void
   ): void;
 
   function logoutOtherClients(
-    callback?: (error?: Error | Meteor.Error | Meteor.TypedError) => void
+    callback?: (error?: Error | BaseMeteor.Error | BaseMeteor.TypedError) => void
   ): void;
 
   var ui: {
@@ -134,18 +143,18 @@ export namespace Accounts {
   function removeEmail(userId: string, email: string): void;
 
   function onCreateUser(
-    func: (options: { profile?: {} | undefined }, user: Meteor.User) => void
+    func: (options: { profile?: {} | undefined }, user: BaseMeteor.User) => void
   ): void;
 
   function findUserByEmail(
     email: string,
     options?: { fields?: Mongo.FieldSpecifier | undefined }
-  ): Meteor.User | null | undefined;
+  ): BaseMeteor.User | null | undefined;
 
   function findUserByUsername(
     username: string,
     options?: { fields?: Mongo.FieldSpecifier | undefined }
-  ): Meteor.User | null | undefined;
+  ): BaseMeteor.User | null | undefined;
 
   function sendEnrollmentEmail(
     userId: string,
@@ -191,9 +200,9 @@ export namespace Accounts {
   interface IValidateLoginAttemptCbOpts {
     type: string;
     allowed: boolean;
-    error: Meteor.Error;
-    user: Meteor.User;
-    connection: Meteor.Connection;
+    error: BaseMeteor.Error;
+    user: BaseMeteor.User;
+    connection: BaseMeteor.Connection;
     methodName: string;
     methodArguments: any[];
   }
@@ -206,8 +215,8 @@ export namespace Accounts {
 export namespace Accounts {
   function onLogout(
     func: (options: {
-      user: Meteor.User;
-      connection: Meteor.Connection;
+      user: BaseMeteor.User;
+      connection: BaseMeteor.Connection;
     }) => void
   ): void;
 }
@@ -245,7 +254,7 @@ export namespace Accounts {
    * optionally `tokenExpires`.
    *
    * This function takes care of:
-   * - Updating the Meteor.loggingIn() reactive data source
+   * - Updating the BaseMeteor.loggingIn() reactive data source
    * - Calling the method in 'wait' mode
    * - On success, saving the resume token to localStorage
    * - On success, calling Accounts.connection.setUserId()
@@ -300,7 +309,7 @@ export namespace Accounts {
    * `password.digest`).
    */
   function _checkPassword(
-    user: Meteor.User,
+    user: BaseMeteor.User,
     password: Password
   ): { userId: string; error?: any };
 }
