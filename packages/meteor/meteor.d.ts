@@ -1,8 +1,3 @@
-import { Mongo } from 'meteor/mongo';
-import { EJSONable, EJSONableProperty } from 'meteor/ejson';
-import { Blaze } from 'meteor/blaze';
-import { DDP } from 'meteor/ddp';
-
 export type global_Error = Error;
 
 export namespace Meteor {
@@ -57,13 +52,6 @@ export namespace Meteor {
     profile?: UserProfile;
     services?: any;
   }
-
-  function user(options?: {
-    fields?: Mongo.FieldSpecifier | undefined;
-  }): User | null;
-
-  function userId(): string | null;
-  var users: Mongo.Collection<User>;
   /** User **/
 
   /** Error **/
@@ -118,71 +106,6 @@ export namespace Meteor {
     errorType: string;
   }
   /** Error **/
-
-  /** Method **/
-  interface MethodThisType {
-    /** Access inside a method invocation. Boolean value, true if this invocation is a stub. */
-    isSimulation: boolean;
-    /** The id of the user that made this method call, or `null` if no user was logged in. */
-    userId: string | null;
-    /**
-     * Access inside a method invocation. The connection that this method was received on. `null` if the method is not associated with a connection, eg. a server initiated method call. Calls
-     * to methods made from a server method which was in turn initiated from the client share the same `connection`. */
-    connection: Connection | null;
-    /**
-     * Set the logged in user.
-     * @param userId The value that should be returned by `userId` on this connection.
-     */
-    setUserId(userId: string | null): void;
-    /** Call inside a method invocation. Allow subsequent method from this client to begin running in a new fiber. */
-    unblock(): void;
-  }
-
-  /**
-   * Defines functions that can be invoked over the network by clients.
-   * @param methods Dictionary whose keys are method names and values are functions.
-   */
-  function methods(methods: {
-    [key: string]: (this: MethodThisType, ...args: any[]) => any;
-  }): void;
-
-  /**
-   * Invokes a method passing any number of arguments.
-   * @param name Name of method to invoke
-   * @param args Optional method arguments
-   */
-  function call(name: string, ...args: any[]): any;
-
-  function apply<
-    Result extends
-      | EJSONable
-      | EJSONable[]
-      | EJSONableProperty
-      | EJSONableProperty[]
-  >(
-    name: string,
-    args: ReadonlyArray<EJSONable | EJSONableProperty>,
-    options?: {
-      wait?: boolean | undefined;
-      onResultReceived?:
-        | ((
-            error: global_Error | Meteor.Error | undefined,
-            result?: Result
-          ) => void)
-        | undefined;
-      /**
-       * (Client only) if true, don't send this method again on reload, simply call the callback an error with the error code 'invocation-failed'.
-       */
-      noRetry?: boolean | undefined;
-      returnStubValue?: boolean | undefined;
-      throwStubExceptions?: boolean | undefined;
-    },
-    asyncCallback?: (
-      error: global_Error | Meteor.Error | undefined,
-      result?: Result
-    ) => void
-  ): any;
-  /** Method **/
 
   /** Url **/
   /**
@@ -364,37 +287,6 @@ export namespace Meteor {
     callback?: (error?: global_Error | Meteor.Error | Meteor.TypedError) => void
   ): void;
   /** Login **/
-
-  /** Event **/
-  interface Event {
-    type: string;
-    target: HTMLElement;
-    currentTarget: HTMLElement;
-    which: number;
-    stopPropagation(): void;
-    stopImmediatePropagation(): void;
-    preventDefault(): void;
-    isPropagationStopped(): boolean;
-    isImmediatePropagationStopped(): boolean;
-    isDefaultPrevented(): boolean;
-  }
-  interface EventHandlerFunction extends Function {
-    (event?: Meteor.Event, templateInstance?: Blaze.TemplateInstance): void;
-  }
-  interface EventMap {
-    [id: string]: Meteor.EventHandlerFunction;
-  }
-  /** Event **/
-
-  /** Connection **/
-  function reconnect(): void;
-
-  function disconnect(): void;
-  /** Connection **/
-
-  /** Status **/
-  function status(): DDP.DDPStatus;
-  /** Status **/
 
   /** Pub/Sub **/
   /**
