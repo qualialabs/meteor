@@ -1,6 +1,6 @@
 Package.describe({
   summary: 'A user account system',
-  version: '2.2.6-qualia.3',
+  version: '2.2.6',
 });
 
 Package.onUse(api => {
