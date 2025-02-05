@@ -1,5 +1,6 @@
 import bcrypt from 'bcrypt'
 import {Accounts} from "meteor/accounts-base";
+import Fiber from "fibers";
 
 const bcryptHash = Meteor.wrapAsync(bcrypt.hash);
 const bcryptCompare = Meteor.wrapAsync(bcrypt.compare);
@@ -997,9 +998,11 @@ Accounts.createUser = (options, callback) => {
 ///
 /// PASSWORD-SPECIFIC INDEXES ON USERS
 ///
-Meteor.users.createIndex('services.email.verificationTokens.token',
-                          { unique: true, sparse: true });
-Meteor.users.createIndex('services.password.reset.token',
-                          { unique: true, sparse: true });
-Meteor.users.createIndex('services.password.enroll.token',
-                          { unique: true, sparse: true });
+new Fiber(() => {
+  Meteor.users.createIndex('services.email.verificationTokens.token',
+                            { unique: true, sparse: true });
+  Meteor.users.createIndex('services.password.reset.token',
+                            { unique: true, sparse: true });
+  Meteor.users.createIndex('services.password.enroll.token',
+                            { unique: true, sparse: true });
+}).run()

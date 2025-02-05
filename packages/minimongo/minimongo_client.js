@@ -1,1 +1,1 @@
-import './minimongo_common.js';
+export { Minimongo, LocalCollection } from './minimongo_common.js';

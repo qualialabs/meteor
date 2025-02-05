@@ -1,3 +1,4 @@
+import Fiber from "fibers";
 import { Facts, FACTS_COLLECTION, FACTS_PUBLICATION } from './facts_base_common';
 
 const hasOwn = Object.prototype.hasOwnProperty;
@@ -54,26 +55,28 @@ Facts.resetServerFacts = function () {
 // Deferred, because we have an unordered dependency on livedata.
 // XXX is this safe? could somebody try to connect before Meteor.publish is
 // called?
-Meteor.defer(function () {
-  // XXX Also publish facts-by-package.
-  Meteor.publish(FACTS_PUBLICATION, function () {
-    const sub = this;
-    if (!userIdFilter(this.userId)) {
-      sub.ready();
-      return;
-    }
+new Fiber(() => {
+  Meteor.defer(function () {
+    // XXX Also publish facts-by-package.
+    Meteor.publish(FACTS_PUBLICATION, function () {
+      const sub = this;
+      if (!userIdFilter(this.userId)) {
+        sub.ready();
+        return;
+      }
 
-    activeSubscriptions.push(sub);
-    Object.keys(factsByPackage).forEach(function (pkg) {
-      sub.added(FACTS_COLLECTION, pkg, factsByPackage[pkg]);
-    });
-    sub.onStop(function () {
-      activeSubscriptions =
-        activeSubscriptions.filter(activeSub => activeSub !== sub);
-    });
-    sub.ready();
-  }, {is_auto: true});
-});
+      activeSubscriptions.push(sub);
+      Object.keys(factsByPackage).forEach(function (pkg) {
+        sub.added(FACTS_COLLECTION, pkg, factsByPackage[pkg]);
+      });
+      sub.onStop(function () {
+        activeSubscriptions =
+          activeSubscriptions.filter(activeSub => activeSub !== sub);
+      });
+      sub.ready();
+    }, {is_auto: true});
+  });
+}).run();
 
 export {
   Facts,

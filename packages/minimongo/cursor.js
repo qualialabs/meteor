@@ -1,5 +1,6 @@
 import LocalCollection from './local_collection.js';
 import { hasOwn } from './common.js';
+import { Minimongo } from './minimongo_common.js';
 import { ASYNC_CURSOR_METHODS, getAsyncMethodName } from "./constants";
 
 // Cursor: a specification for a particular subset of documents, w/ a defined

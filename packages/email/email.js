@@ -262,7 +262,7 @@ Email.send = function(options) {
   }
 
   if (mailUrlEnv || mailUrlSettings) {
-    const transport = getTransport();
+    const transport = getTransport.call(Email);
     smtpSend(transport, options);
     return;
   }

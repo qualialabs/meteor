@@ -4,6 +4,7 @@ var nextSlot = 0;
 var currentValues = [];
 var callAsyncMethodRunning = false;
 
+Meteor.inFiberOrClient = () => true;
 Meteor.EnvironmentVariable = function () {
   this.slot = nextSlot++;
 };

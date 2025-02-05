@@ -56,6 +56,9 @@ Meteor = {
   isModern: config.isModern
 };
 
+// a true global, so we don't have to import it everywhere (which fights with esbuild define)
+globalThis.Meteor = Meteor;
+
 if (config.gitCommitHash) {
   /**
    * @summary Hexadecimal Git commit hash, if the application is using Git

@@ -163,20 +163,21 @@ if (Meteor.isServer) {
 
 export const testExport = 'oyez';
 
+import { testExport as oyez } from './runtime-tests.js';
+
+
 Tinytest.add('ecmascript - runtime - classes - properties', test => {
   class ClassWithProperties {
     property = ['prop', 'rty'].join('e');
     static staticProp = 1234;
 
     check = self => {
-      import { testExport as oyez } from './runtime-tests.js';
       test.equal(oyez, 'oyez');
       test.isTrue(self === this);
       test.equal(this.property, 'property');
     };
 
     method() {
-      import { testExport as oyez } from './runtime-tests.js';
       test.equal(oyez, 'oyez');
     }
   }

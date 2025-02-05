@@ -71,17 +71,17 @@ function convertOplogDiff(oplogEntry, diff, prefix) {
   Object.entries(diff).forEach(([diffKey, value]) => {
     if (diffKey === 'd') {
       // Handle `$unset`s.
-      oplogEntry.$unset ??= {};
+      oplogEntry.$unset = oplogEntry.$unset ?? {};
       Object.keys(value).forEach(key => {
         oplogEntry.$unset[join(prefix, key)] = true;
       });
     } else if (diffKey === 'i') {
       // Handle (potentially) nested `$set`s.
-      oplogEntry.$set ??= {};
+      oplogEntry.$set = oplogEntry.$set ?? {};
       flattenObjectInto(oplogEntry.$set, value, prefix);
     } else if (diffKey === 'u') {
       // Handle flat `$set`s.
-      oplogEntry.$set ??= {};
+      oplogEntry.$set = oplogEntry.$set ?? {};
       Object.entries(value).forEach(([key, value]) => {
         oplogEntry.$set[join(prefix, key)] = value;
       });
@@ -97,10 +97,10 @@ function convertOplogDiff(oplogEntry, diff, prefix) {
 
           const positionKey = join(join(prefix, key), position.slice(1));
           if (value === null) {
-            oplogEntry.$unset ??= {};
+            oplogEntry.$unset = oplogEntry.$unset ?? {};
             oplogEntry.$unset[positionKey] = true;
           } else {
-            oplogEntry.$set ??= {};
+            oplogEntry.$set = oplogEntry.$set ?? {};
             oplogEntry.$set[positionKey] = value;
           }
         });

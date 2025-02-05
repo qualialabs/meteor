@@ -1,9 +1,11 @@
 import { WebAppInternals } from "meteor/webapp";
 import MagicString from "magic-string";
-import { SAXParser } from "parse5";
+import parse5 from "parse5";
 import { create as createStream } from "combined-stream2";
 import { ServerSink } from "./server-sink.js";
 import { onPageLoad } from "./server.js";
+
+const { SAXParser } = parse5;
 
 WebAppInternals.registerBoilerplateDataCallback(
   "meteor/server-render",

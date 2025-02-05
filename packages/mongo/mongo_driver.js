@@ -211,10 +211,8 @@ MongoConnection = function (url, options) {
     self._docFetcher = new DocFetcher(self);
   }
 };
-
 MongoConnection.prototype.close = function() {
   var self = this;
-
   if (! self.db)
     throw Error("close called before Connection created?");
 

@@ -235,7 +235,7 @@ class Server {
     const defaultEval = repl.eval;
 
     function wrappedDefaultEval(code, context, file, callback) {
-      if (Package.ecmascript) {
+      if (Package.ecmascript && !__meteor_runtime_config__.isMeteorLite) {
         try {
           code = Package.ecmascript.ECMAScript.compileForShell(code, {
             cacheDirectory: getCacheDirectory(shellDir)

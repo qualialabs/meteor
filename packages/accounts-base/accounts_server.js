@@ -465,6 +465,9 @@ export class AccountsServer extends AccountsCommon {
     if (user) {
       attempt.user = user;
     }
+    if (result.options) {
+      attempt.options = result.options;
+    }
 
     // _validateLogin may mutate `attempt` by adding an error and changing allowed
     // to false, but that's the only change it can make (and the user's callbacks
@@ -1804,21 +1807,23 @@ const setupUsersCollection = users => {
   });
 
   /// DEFAULT INDEXES ON USERS
-  users.createIndex('username', { unique: true, sparse: true });
-  users.createIndex('emails.address', { unique: true, sparse: true });
-  users.createIndex('services.resume.loginTokens.hashedToken',
-    { unique: true, sparse: true });
-  users.createIndex('services.resume.loginTokens.token',
-    { unique: true, sparse: true });
-  // For taking care of logoutOtherClients calls that crashed before the
-  // tokens were deleted.
-  users.createIndex('services.resume.haveLoginTokensToDelete',
-    { sparse: true });
-  // For expiring login tokens
-  users.createIndex("services.resume.loginTokens.when", { sparse: true });
-  // For expiring password tokens
-  users.createIndex('services.password.reset.when', { sparse: true });
-  users.createIndex('services.password.enroll.when', { sparse: true });
+  Meteor.startup(() => {
+    users.createIndex('username', { unique: true, sparse: true });
+    users.createIndex('emails.address', { unique: true, sparse: true });
+    users.createIndex('services.resume.loginTokens.hashedToken',
+      { unique: true, sparse: true });
+    users.createIndex('services.resume.loginTokens.token',
+      { unique: true, sparse: true });
+    // For taking care of logoutOtherClients calls that crashed before the
+    // tokens were deleted.
+    users.createIndex('services.resume.haveLoginTokensToDelete',
+      { sparse: true });
+    // For expiring login tokens
+    users.createIndex("services.resume.loginTokens.when", { sparse: true });
+    // For expiring password tokens
+    users.createIndex('services.password.reset.when', { sparse: true });
+    users.createIndex('services.password.enroll.when', { sparse: true });
+  });
 };
 
 
@@ -1840,4 +1845,3 @@ const generateCasePermutationsForString = string => {
   }
   return permutations;
 }
-

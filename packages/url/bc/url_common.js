@@ -23,9 +23,10 @@ var _encodeParams = function (params, prefix) {
   return str.join('&').replace(/%20/g, '+');
 };
 
-exports._encodeParams = _encodeParams;
+const __encodeParams = _encodeParams;
+export { __encodeParams as _encodeParams };
 
-exports.buildUrl = function(before_qmark, from_qmark, opt_query, opt_params) {
+export function buildUrl(before_qmark, from_qmark, opt_query, opt_params) {
   var url_without_query = before_qmark;
   var query = from_qmark ? from_qmark.slice(1) : null;
 
@@ -45,4 +46,4 @@ exports.buildUrl = function(before_qmark, from_qmark, opt_query, opt_params) {
     url += ("?"+query);
 
   return url;
-};
+}

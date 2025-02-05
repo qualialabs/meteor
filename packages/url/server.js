@@ -1,9 +1,11 @@
-const { URL, URLSearchParams } = require('url');
+import { URL, URLSearchParams } from 'url';
+import { setMinimumBrowserVersions } from "meteor/modern-browsers";
+import * as bc from './bc/url_server';
+export {
+  URL,
+  URLSearchParams
+};
 
-exports.URL = URL;
-exports.URLSearchParams = URLSearchParams;
-
-const { setMinimumBrowserVersions } = require("meteor/modern-browsers");
 
 // https://caniuse.com/#feat=url
 setMinimumBrowserVersions({
@@ -22,4 +24,4 @@ setMinimumBrowserVersions({
 }, module.id);
 
 // backwards compatibility
-Object.assign(exports.URL, require('./bc/url_server'));
+Object.assign(URL, bc);
