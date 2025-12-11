@@ -40,8 +40,8 @@ exports.populateData = function(response) {
     response.data = null;
   }
 };
-
-var HTTP = exports.HTTP = {};
+var HTTP = {};
+exports.HTTP = HTTP;
 
 /**
  * @summary Send an HTTP `GET` request. Equivalent to calling [`HTTP.call`](#http_call) with "GET" as the first argument.

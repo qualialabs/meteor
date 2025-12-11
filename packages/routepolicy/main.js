@@ -1,2 +1,2 @@
-import { default as RoutePolicyConstructor } from './routepolicy';
+import RoutePolicyConstructor from './routepolicy';
 export const RoutePolicy = new RoutePolicyConstructor();

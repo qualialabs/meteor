@@ -56,6 +56,7 @@ Autoupdate.appId = __meteor_runtime_config__.appId = process.env.APP_ID;
 var syncQueue = new Meteor._SynchronousQueue();
 
 function updateVersions(shouldReloadClientProgram) {
+  Promise.await(WebApp.waitForReady());
   // Step 1: load the current client program on the server
   if (shouldReloadClientProgram) {
     WebAppInternals.reloadClientPrograms();

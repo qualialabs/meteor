@@ -710,7 +710,7 @@ Tinytest.add(
   'accounts - verify setAdditionalFindUserOnExternalLogin hook can provide user',
   test => {
       // create test user, without a google service
-      const testEmail = "test@testdomain.com"
+      const testEmail = "test@testdomain.com" + Random.id();
       const uid0 = Accounts.createUser({email: testEmail})
 
       // Verify that user is found from email and service merged

@@ -1,3 +1,4 @@
+import Fiber from 'fibers';
 // By adding this package, you get the following default policy:
 // No eval or other string-to-code, and content can only be loaded from the
 // same origin as the app (except for XHRs and websocket connections, which can
@@ -300,6 +301,7 @@ _.each(resources,  function (resource) {
   };
 });
 
-setDefaultPolicy();
+// setDefaultPolicy eventually calls WebAppInternals.generateBoilerplate which must be in a fiber
+new Fiber(() => { setDefaultPolicy(); }).run();
 
 exports.BrowserPolicy = BrowserPolicy;

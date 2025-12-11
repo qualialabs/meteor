@@ -1,3 +1,4 @@
+import { createHash } from 'crypto';
 const minimumVersions = Object.create(null);
 const hasOwn = Object.prototype.hasOwnProperty;
 
@@ -119,20 +120,19 @@ function getCaller(calleeName) {
   });
   return caller;
 }
-
 function getMinimumBrowserVersions() { return minimumVersions; }
 
-Object.assign(exports, {
+function calculateHashOfMinimumVersions() {
+  return createHash('sha1')
+    .update(JSON.stringify(minimumVersions))
+    .digest('hex');
+};
+export {
   isModern,
   setMinimumBrowserVersions,
   getMinimumBrowserVersions,
-  calculateHashOfMinimumVersions() {
-    const { createHash } = require('crypto');
-    return createHash('sha1')
-      .update(JSON.stringify(minimumVersions))
-      .digest('hex');
-  },
-});
+  calculateHashOfMinimumVersions
+};
 
 // For making defensive copies of [major, minor, ...] version arrays, so
 // they don't change unexpectedly.

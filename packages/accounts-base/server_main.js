@@ -4,7 +4,7 @@ import { AccountsServer } from "./accounts_server.js";
  * @namespace Accounts
  * @summary The namespace for all server-side accounts-related methods.
  */
-Accounts = new AccountsServer(Meteor.server);
+const Accounts = new AccountsServer(Meteor.server);
 
 // Users table. Don't use the normal autopublish, since we want to hide
 // some fields. Code to autopublish this is in accounts_server.js.
@@ -23,5 +23,6 @@ export {
   // accounts-base package, properties of non-entry-point modules need to
   // be re-exported in order to be accessible to modules that import the
   // accounts-base package.
-  AccountsServer
+  AccountsServer,
+  Accounts
 };

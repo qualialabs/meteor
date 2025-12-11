@@ -366,7 +366,7 @@ if (Meteor.isClient) (() => {
     // Create user error without callback should throw error
     function (test, expect) {
       this.newUsername = `adalovelace${this.randomSuffix}`;
-      test.throws(function(){
+      test.throws(() => {
         Accounts.createUser({ username: this.newUsername, password: '' });
       }, /Password may not be empty/);
     },

@@ -1,8 +1,9 @@
+import Fiber from 'fibers';
 import assert from 'assert';
 import { readFileSync, chmodSync, chownSync } from 'fs';
 import { createServer } from 'http';
 import { userInfo } from 'os';
-import { join as pathJoin, dirname as pathDirname } from 'path';
+import { join as pathJoin, dirname as pathDirname, resolve } from 'path';
 import { parse as parseUrl } from 'url';
 import { createHash } from 'crypto';
 import { connect } from './connect.js';
@@ -27,6 +28,11 @@ var LONG_SOCKET_TIMEOUT = 120 * 1000;
 export const WebApp = {};
 export const WebAppInternals = {};
 
+let mainResolve;
+let main;
+const mainPromise = new Promise((resolve) => {
+  mainResolve = resolve;
+});
 const hasOwn = Object.prototype.hasOwnProperty;
 
 // backwards compat to 2.0 of connect
@@ -46,6 +52,7 @@ WebApp.defaultArch = 'web.browser.legacy';
 // XXX maps archs to manifests
 WebApp.clientPrograms = {};
 
+WebApp.waitForReady = async () => await mainPromise;
 // XXX maps archs to program path on filesystem
 var archPath = {};
 
@@ -621,7 +628,7 @@ WebAppInternals.staticFilesMiddleware = async function(
   // If pauseClient(arch) has been called, program.paused will be a
   // Promise that will be resolved when the program is unpaused.
   const program = WebApp.clientPrograms[arch];
-  await program.paused;
+  Promise.await(program.paused);
 
   if (
     path === '/meteor_runtime_config.js' &&
@@ -683,7 +690,7 @@ WebAppInternals.staticFilesMiddleware = async function(
     );
   }
 
-  if (info.type === 'js' || info.type === 'dynamic js') {
+  if (info.type === 'js' || info.type === 'dynamic js' || info.type === 'module js') {
     res.setHeader('Content-Type', 'application/javascript; charset=UTF-8');
   } else if (info.type === 'css') {
     res.setHeader('Content-Type', 'text/css; charset=UTF-8');
@@ -1035,8 +1042,6 @@ function runWebAppServer() {
     }));
   }
 
-  WebAppInternals.reloadClientPrograms();
-
   // webserver
   var app = connect();
 
@@ -1269,7 +1274,7 @@ function runWebAppServer() {
 
       // If pauseClient(arch) has been called, program.paused will be a
       // Promise that will be resolved when the program is unpaused.
-      await WebApp.clientPrograms[arch].paused;
+      Promise.await(WebApp.clientPrograms[arch].paused);
 
       return getBoilerplateAsync(request, arch)
         .then(({ stream, statusCode, headers: newHeaders }) => {
@@ -1357,11 +1362,13 @@ function runWebAppServer() {
       httpServer.listen(listenOptions, cb);
     },
   });
+  WebAppInternals.reloadClientPrograms();
 
   // Let the rest of the packages (and Meteor.startup hooks) insert connect
   // middlewares and update __meteor_runtime_config__, then keep going to set up
   // actually serving HTML.
-  exports.main = argv => {
+  // TODO: fix this
+  main = argv => {
     WebAppInternals.generateBoilerplate();
 
     const startHttpServer = listenOptions => {
@@ -1439,6 +1446,7 @@ function runWebAppServer() {
 
     return 'DAEMON';
   };
+  mainResolve();
 }
 
 var inlineScriptsAllowed = true;
@@ -1485,4 +1493,11 @@ WebAppInternals.getBoilerplate = getBoilerplate;
 WebAppInternals.additionalStaticJs = additionalStaticJs;
 
 // Start the server!
-runWebAppServer();
+new Fiber(() => {
+  runWebAppServer();
+}).run();
+
+export async function getMain() {
+  await mainPromise;
+  return main;
+}

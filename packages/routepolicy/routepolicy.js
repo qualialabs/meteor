@@ -80,7 +80,9 @@ export default class RoutePolicy {
     if (_testManifest) {
       return check(_testManifest);
     }
-
+  
+    // TODO: fix this
+    /*
     const { WebApp } = require("meteor/webapp");
     let errorMessage = null;
 
@@ -89,7 +91,7 @@ export default class RoutePolicy {
       return errorMessage = check(manifest);
     });
 
-    return errorMessage;
+    return errorMessage;*/
   }
 
   declare(urlPrefix, type) {

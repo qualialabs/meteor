@@ -62,9 +62,10 @@ export const closeTemplate = ({
   '',
 
   ...(js || []).map(file =>
-    template('  <script type="text/javascript" src="<%- src %>"<%= sri %>></script>')({
+    template('  <script type="<%- type %>" src="<%- src %>"<%= sri %>></script>')({
       src: bundledJsCssUrlRewriteHook(file.url),
       sri: sri(file.sri, sriMode),
+      type: file.type === 'module js' ? 'module' : 'text/javascript'
     })
   ),
 

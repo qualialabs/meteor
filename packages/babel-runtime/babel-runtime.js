@@ -1,5 +1,5 @@
 try {
-  var babelRuntimeVersion = require("@babel/runtime/package.json").version;
+  //var babelRuntimeVersion = (await import("@babel/runtime/package.json")).version;
 } catch (e) {
   throw new Error([
     "",
@@ -10,7 +10,7 @@ try {
     ""
   ].join("\n"));
 }
-
+/*
 if (parseInt(babelRuntimeVersion, 10) < 7 ||
     (babelRuntimeVersion.indexOf("7.0.0-beta.") === 0 &&
      parseInt(babelRuntimeVersion.split(".").pop(), 10) < 56)) {
@@ -24,3 +24,4 @@ if (parseInt(babelRuntimeVersion, 10) < 7 ||
     ""
   ].join("\n"));
 }
+*/

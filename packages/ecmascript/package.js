@@ -35,10 +35,5 @@ Package.onTest(function(api) {
   api.use(['es5-shim', 'ecmascript', 'babel-compiler']);
   api.addFiles('runtime-tests.js');
   api.addFiles('transpilation-tests.js', 'server');
-
-  api.addFiles('bare-test.js');
-  api.addFiles('bare-test-file.js', ['client', 'server'], {
-    bare: true,
-  });
   api.addFiles('runtime-tests-client.js', ['client', 'web.browser.legacy']);
 });

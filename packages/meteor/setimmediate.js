@@ -30,9 +30,6 @@
 
 "use strict";
 
-var global = this;
-
-
 // IE 10, Node >= 9.1
 
 function useSetImmediate() {

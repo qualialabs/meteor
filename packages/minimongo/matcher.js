@@ -1,4 +1,4 @@
-import LocalCollection from './local_collection.js';
+import { _selectorIsId } from './helpers.js';
 import {
   compileDocumentSelector,
   hasOwn,
@@ -89,7 +89,7 @@ export default class Matcher {
     }
 
     // shorthand -- scalar _id
-    if (LocalCollection._selectorIsId(selector)) {
+    if (_selectorIsId(selector)) {
       this._selector = {_id: selector};
       this._recordPathUsed('_id');
 
@@ -128,7 +128,7 @@ export default class Matcher {
 }
 
 // helpers used by compiled selector code
-LocalCollection._f = {
+Matcher._f = {
   // XXX for _all and _in, consider building 'inquery' at compile time..
   _type(v) {
     if (typeof v === 'number') {
@@ -236,11 +236,11 @@ LocalCollection._f = {
       return 1;
     }
 
-    let ta = LocalCollection._f._type(a);
-    let tb = LocalCollection._f._type(b);
+    let ta = Matcher._f._type(a);
+    let tb = Matcher._f._type(b);
 
-    const oa = LocalCollection._f._typeorder(ta);
-    const ob = LocalCollection._f._typeorder(tb);
+    const oa = Matcher._f._typeorder(ta);
+    const ob = Matcher._f._typeorder(tb);
 
     if (oa !== ob) {
       return oa < ob ? -1 : 1;
@@ -289,7 +289,7 @@ LocalCollection._f = {
         return result;
       };
 
-      return LocalCollection._f._cmp(toArray(a), toArray(b));
+      return Matcher._f._cmp(toArray(a), toArray(b));
     }
 
     if (ta === 4) { // Array
@@ -302,7 +302,7 @@ LocalCollection._f = {
           return 1;
         }
 
-        const s = LocalCollection._f._cmp(a[i], b[i]);
+        const s = Matcher._f._cmp(a[i], b[i]);
         if (s !== 0) {
           return s;
         }

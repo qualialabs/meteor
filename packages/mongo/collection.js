@@ -6,6 +6,8 @@ import {
 } from "meteor/minimongo/constants";
 
 import { normalizeProjection } from "./mongo_utils";
+import { Log } from 'meteor/logging';
+import { LocalCollectionDriver } from './local_collection_driver.js';
 
 /**
  * @summary Namespace for MongoDB-related items
@@ -109,7 +111,6 @@ Mongo.Collection = function Collection(name, options) {
     ) {
       options._driver = MongoInternals.defaultRemoteCollectionDriver();
     } else {
-      const { LocalCollectionDriver } = require('./local_collection_driver.js');
       options._driver = LocalCollectionDriver;
     }
   }
@@ -733,13 +734,16 @@ Object.assign(Mongo.Collection.prototype, {
   // We'll actually design an index API later. For now, we just pass through to
   // Mongo's, but make it synchronous.
   _ensureIndex(index, options) {
+    if (!Meteor.inFiberOrClient()) {
+      Meteor.bindEnvironment(() => this._ensureIndex(index, options));
+      return;
+    }
     var self = this;
     if (!self._collection._ensureIndex || !self._collection.createIndex)
       throw new Error('Can only call createIndex on server collections');
     if (self._collection.createIndex) {
       self._collection.createIndex(index, options);
     } else {
-      import { Log } from 'meteor/logging';
       Log.debug(`_ensureIndex has been deprecated, please use the new 'createIndex' instead${options?.name ? `, index name: ${options.name}` : `, index: ${JSON.stringify(index)}`}`)
       self._collection._ensureIndex(index, options);
     }
@@ -758,6 +762,10 @@ Object.assign(Mongo.Collection.prototype, {
    * @param {Boolean} options.sparse Define that the index is sparse, more at [MongoDB documentation](https://docs.mongodb.com/manual/core/index-sparse/)
    */
   createIndex(index, options) {
+    if (!Meteor.inFiberOrClient()) {
+      Meteor.bindEnvironment(() => this.createIndex(index, options));
+      return;
+    }
     var self = this;
     if (!self._collection.createIndex)
       throw new Error('Can only call createIndex on server collections');
@@ -765,8 +773,6 @@ Object.assign(Mongo.Collection.prototype, {
       self._collection.createIndex(index, options);
     } catch (e) {
       if (e.message.includes('An equivalent index already exists with the same name but different options.') && Meteor.settings?.packages?.mongo?.reCreateIndexOnOptionMismatch) {
-        import { Log } from 'meteor/logging';
-
         Log.info(`Re-creating index ${index} for ${self._name} due to options mismatch.`);
         self._collection._dropIndex(index);
         self._collection.createIndex(index, options);

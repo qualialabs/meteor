@@ -1,1 +1,2 @@
-exports.GeoJSON = require("./geojson-utils.js");
+import GeoJSON from "./geojson-utils.js";
+export { GeoJSON };
