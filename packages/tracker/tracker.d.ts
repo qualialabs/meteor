@@ -17,6 +17,10 @@ export namespace Tracker {
      */
     firstRun: boolean;
     /**
+     * Forces autorun blocks to be executed in synchronous-looking order by storing the value autorun promise thus making it awaitable.
+     */
+    firstRunPromise: Promise<unknown>
+    /**
      * Invalidates this computation so that it will be rerun.
      */
     invalidate(): void;
@@ -48,7 +52,7 @@ export namespace Tracker {
    * The current computation, or `null` if there isn't one.  The current computation is the `Tracker.Computation` object created by the innermost active call to
    * `Tracker.autorun`, and it's the computation that gains dependencies when reactive data sources are accessed.
    */
-  var currentComputation: Computation;
+  var currentComputation: Computation | null;
 
   var Dependency: DependencyStatic;
   /**
@@ -108,6 +112,16 @@ export namespace Tracker {
       onError?: Function | undefined;
     }
   ): Computation;
+
+  /**
+   * @summary Helper function to make the tracker work with promises.
+   * @param computation Computation that tracked
+   * @param func a function that needs to be called and be reactive. This may be async or not - but this function is typically called after an await
+   */
+  function withComputation<T>(
+    computation: Computation | null,
+    func: () => T
+  ): T;
 
   /**
    * Process all reactive updates immediately and ensure that all invalidated computations are rerun.
