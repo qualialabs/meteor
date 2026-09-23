@@ -409,3 +409,75 @@ describe("stack traces", function () {
     });
   }));
 });
+
+describe("fiber pool async context", function () {
+  var AsyncLocalStorage = require("async_hooks").AsyncLocalStorage;
+  var als = new AsyncLocalStorage();
+
+  // Pool fibers are shared between unrelated callers. Between jobs each pool fiber parks
+  // itself with Fiber.yield() in its own async scope, so that scope must not carry the
+  // AsyncLocalStorage stores of whichever caller happened to create the fiber.
+  //
+  // Only meaningful with native promises: the `promise` polyfill schedules reactions through
+  // asap, which batches unrelated callbacks under a single async context.
+  var itWithNativePromise = Promise === global.Promise ? it : it.skip;
+  itWithNativePromise("does not expose the creator's ALS store at the idle yield", function () {
+    var GROW = 30; // > targetFiberCount, so new pool fibers must be created under "creator"
+    var USE = 50;
+    var recording = false;
+    var seenAtYields = [];
+    var seenAtIdleYields = [];
+    var originalYield = Fiber.yield;
+    Fiber.yield = function () {
+      if (recording) {
+        seenAtYields.push(als.getStore());
+        if (Fiber.current && Fiber.current._meteorPromisePoolIdle) {
+          seenAtIdleYields.push(als.getStore());
+        }
+      }
+      return originalYield.apply(this, arguments);
+    };
+
+    return als.run("creator", function () {
+      return Promise.all(Array.from({ length: GROW }, function () {
+        return Promise.asyncApply(function () { Promise.await(wait(20)); });
+      }));
+    }).then(function () {
+      recording = true;
+      return als.run("user", function () {
+        var chain = Promise.resolve();
+        var seenInsideJobs = [];
+        for (var i = 0; i < USE; ++i) {
+          chain = chain.then(function () {
+            return Promise.asyncApply(function () { return als.getStore(); });
+          }).then(function (store) { seenInsideJobs.push(store); });
+        }
+        return chain.then(function () { return seenInsideJobs; });
+      });
+    }).then(function (seenInsideJobs) {
+      recording = false;
+      Fiber.yield = originalYield;
+
+      // Inside a job the store is the submitter's.
+      assert.strictEqual(seenInsideJobs.length, USE);
+      seenInsideJobs.forEach(function (store) { assert.strictEqual(store, "user"); });
+
+      // No yield made while only "user" was running may see "creator". Before the fix every
+      // pool fiber's idle yield did, because the fiber inherited its creator's stores.
+      assert.ok(seenAtYields.length >= USE, "expected at least one yield per job, saw " + seenAtYields.length);
+      seenAtYields.forEach(function (store) {
+        assert.notStrictEqual(store, "creator", "a yield during the user phase saw the creator's store");
+      });
+
+      // The pool flags its idle yield, and that yield carries no store at all.
+      assert.ok(seenAtIdleYields.length >= USE, "expected a flagged idle yield per job, saw " + seenAtIdleYields.length);
+      seenAtIdleYields.forEach(function (store) {
+        assert.strictEqual(store, undefined, "idle yield saw store " + JSON.stringify(store));
+      });
+    }, function (error) {
+      recording = false;
+      Fiber.yield = originalYield;
+      throw error;
+    });
+  });
+});

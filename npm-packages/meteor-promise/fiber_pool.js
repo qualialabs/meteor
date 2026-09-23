@@ -1,6 +1,13 @@
 var assert = require("assert");
 const { AsyncResource } = require("async_hooks");
 
+// Pool fibers are shared infrastructure: they must not inherit the AsyncLocalStorage stores
+// (OpenTelemetry context, etc.) of whichever caller happened to create them, because the
+// fiber's own async scope is what is active while it is parked between jobs. This resource is
+// created at module load, before any request context exists, so anything created inside it
+// starts with no stores at all.
+const PRISTINE_ASYNC_SCOPE = new AsyncResource("FiberPoolRoot");
+
 function FiberPool(targetFiberCount) {
   assert.ok(this instanceof FiberPool);
   assert.strictEqual(typeof targetFiberCount, "number");
@@ -12,10 +19,13 @@ function FiberPool(targetFiberCount) {
     // with our processing of the callback queue.
     var originalYield = Fiber.yield;
 
-    var fiber = new Fiber(function () {
+    var fiber = PRISTINE_ASYNC_SCOPE.runInAsyncScope(() => new Fiber(function () {
       while (fiber) {
-        // Call Fiber.yield() to await further instructions.
+        // Call Fiber.yield() to await further instructions. Flag the fiber as idle so that
+        // instrumentation wrapping Fiber.yield can tell this park apart from a real yield.
+        fiber._meteorPromisePoolIdle = true;
         var entry = originalYield.call(Fiber);
+        delete fiber._meteorPromisePoolIdle;
 
         if (! (entry &&
                typeof entry.callback === "function" &&
@@ -64,7 +74,7 @@ function FiberPool(targetFiberCount) {
           return;
         }
       }
-    });
+    }));
 
     // Run the new Fiber up to the first yield point, so that it will be
     // ready to receive entries.
